@@ -109,7 +109,7 @@
       <div class="flex flex-col bg-base-100 rounded-lg shadow-xl p-2">
         <div class="text-base-content/60 mb-3">SUPPORT</div>
         <a
-          href="/public/terms.html"
+          href="/terms.html"
           target="_blank"
           class="flex justify-between items-center no-underline"
         >
@@ -130,7 +130,7 @@
         </a>
         <div class="divider m-0"></div>
         <a
-          href="/public/privacy.html"
+          href="/privacy.html"
           target="_blank"
           class="flex justify-between items-center no-underline"
         >
