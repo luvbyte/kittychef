@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 
 import Insight from "@/components/Insight.vue";
+import Sidebar from "@/components/Sidebar.vue";
 import Emoticon from "@/components/Emoticon.vue";
 import RecepieBox from "@/components/RecepieBox.vue";
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
@@ -13,6 +14,8 @@ import { modules } from "@/modules";
 const showRecepieBox = ref(false);
 const showThemeSwitcher = ref(false);
 const showRecepiePipelineTree = ref(false);
+
+const showSideBar = ref(false);
 
 const liveUpdate = ref(true);
 
@@ -85,35 +88,53 @@ function selectModule(m) {
   recepiePipeline.value.push(cloneModule(m));
 }
 
+// clear pipeline
 function clearPipeline() {
   recepiePipeline.value.length = 0;
   selectModule.value = null;
 }
-
+// clear both text boxea
 function clearTextBoxes() {
   inputBox.value = "";
   outputBox.value = "";
 }
-
+// copy output box text
 function copyOutputBox() {
   navigator.clipboard.writeText(outputBox.value);
 }
+// swap both input boxes
+function swapTextBox() {
+  [inputBox.value, outputBox.value] = [outputBox.value, inputBox.value];
+}
 
+function toggleLiveUpdate() {
+  liveUpdate.value = !liveUpdate.value;
+  compilePipeline();
+}
+
+// compile pipeline and display in output box
 function compilePipeline() {
-  let result = inputBox.value; // start with input
+  let result = Promise.resolve(inputBox.value);
 
   for (const mod of recepiePipeline.value) {
-    // Build the options object to send into mod.run()
     const options = {};
+
     for (const key in mod.options) {
       options[key] = mod.options[key].value;
     }
 
-    // Run
-    result = mod.run(result, options);
+    // chain sync or async module
+    result = result
+      .then(r => mod.run(r, options)) // handles sync + async safely
+      .catch(err => {
+        return "Error in module " + mod.name + ": " + err;
+      });
   }
 
-  outputBox.value = result; // writing to textarea
+  // output
+  result.then(final => {
+    outputBox.value = final;
+  });
 }
 </script>
 
@@ -125,9 +146,24 @@ function compilePipeline() {
   >
     <!-- Header -->
     <div
-      class="relative bg-primary/20 text-primary p-2 flex justify-between items-center"
+      class="relative bg-primary/20 text-primary p-2 flex justify-between items-center shadow-lg"
     >
-      <div class="flex items-center gap-1">
+      <div @click="showSideBar = true" class="flex items-center gap-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 32 32"
+        >
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 8h22M5 16h22M5 24h22"
+          />
+        </svg>
         <!-- cat icon -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -153,46 +189,17 @@ function compilePipeline() {
             />
           </g>
         </svg>
-        <h1 class="font-bold">KittyChef</h1>
+        <h1 class="font-bold">{{ $t("app.title") }}</h1>
       </div>
       <div class="flex gap-1 items-center">
-        <div @click="showRecepiePipelineTree = true">
-          <!-- rtree icon -->
+        <div
+          class="flex items-center gap-1"
+          @click="showThemeSwitcher = !showThemeSwitcher"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 48 48"
-          >
-            <defs>
-              <mask id="SVGXH65VdQg">
-                <g
-                  fill="none"
-                  stroke="#fff"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="4"
-                >
-                  <path
-                    fill="#555555"
-                    d="M42 36V20H14v16a6 6 0 0 0 6 6h16a6 6 0 0 0 6-6"
-                  />
-                  <path d="M4 20h40M18 8v4m10-6v6m10-4v4" />
-                </g>
-              </mask>
-            </defs>
-            <path
-              fill="currentColor"
-              d="M0 0h48v48H0z"
-              mask="url(#SVGXH65VdQg)"
-            />
-          </svg>
-        </div>
-        <div @click="showThemeSwitcher = !showThemeSwitcher">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="28"
+            height="28"
             viewBox="0 0 24 24"
           >
             <path
@@ -200,6 +207,8 @@ function compilePipeline() {
               d="m3.975 19.8l-.85-.35q-.775-.325-1.037-1.125t.087-1.575l1.8-3.9zm4 2.2q-.825 0-1.412-.587T5.975 20v-6l2.65 7.35q.075.175.15.338t.2.312zm5.15-.1q-.8.3-1.55-.075t-1.05-1.175l-4.45-12.2q-.3-.8.05-1.562t1.15-1.038l7.55-2.75q.8-.3 1.55.075t1.05 1.175l4.45 12.2q.3.8-.05 1.563t-1.15 1.037zM10.975 10q.425 0 .713-.288T11.975 9t-.287-.712T10.975 8t-.712.288T9.975 9t.288.713t.712.287m1.45 10l7.55-2.75L15.525 5l-7.55 2.75zM7.975 7.75L15.525 5z"
             />
           </svg>
+
+          <span class="hidden sm:block">{{ $t("btn.theme") }}</span>
         </div>
       </div>
 
@@ -207,7 +216,7 @@ function compilePipeline() {
       <Transition name="slide-up">
         <div
           v-show="showThemeSwitcher"
-          class="absolute top-10 right-0 w-3/4 max-h-[50svh] overflow-y-auto"
+          class="absolute top-11 right-0 w-3/4 max-h-[50svh] overflow-y-auto"
         >
           <ThemeSwitcher />
         </div>
@@ -239,13 +248,9 @@ function compilePipeline() {
         <div class="flex flex-col h-full min-w-10 sm:min-w-22">
           <!-- live update button -->
           <div
-            class="h-1/2 w-full flex items-center justify-center transition gap-2"
-            :class="
-              liveUpdate
-                ? 'bg-secondary/80 text-secondary-content'
-                : 'bg-secondary/60'
-            "
-            @click="liveUpdate = !liveUpdate"
+            class="h-1/2 w-full flex items-center justify-center transition gap-1 text-secondary-content"
+            :class="liveUpdate ? 'bg-secondary/80 ' : 'bg-secondary/60'"
+            @click="toggleLiveUpdate"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -260,13 +265,13 @@ function compilePipeline() {
                 clip-rule="evenodd"
               />
             </svg>
-            <span class="hidden sm:block">Live</span>
+            <span class="hidden sm:block">{{ $t("btn.live") }}</span>
           </div>
           <!-- Recepie add button -->
           <div
             class="h-1/2 w-full flex items-center bg-primary/80 text-primary-content justify-center gap-2"
           >
-            <div @click="showRecepieBox = true">
+            <div class="flex gap-1 items-center" @click="showRecepieBox = true">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="26"
@@ -286,9 +291,8 @@ function compilePipeline() {
                   d="M11 8.5H5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h6c.28 0 .5.22.5.5s-.22.5-.5.5"
                 />
               </svg>
+              <span class="hidden sm:block">{{ $t("btn.add") }}</span>
             </div>
-
-            <span class="hidden sm:block">Add</span>
           </div>
         </div>
         <!-- right part -->
@@ -303,8 +307,9 @@ function compilePipeline() {
             </div>
 
             <div class="h-full flex items-center">
-              <!-- options button -->
+              <!-- swap button -->
               <div
+                @click="swapTextBox"
                 class="h-full px-2 bg-info/40 text-info-content active:bg-info flex items-center justify-center gap-1"
               >
                 <svg
@@ -313,14 +318,14 @@ function compilePipeline() {
                   height="24"
                   viewBox="0 0 24 24"
                 >
-                  <g fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="12" cy="12" r="3" />
-                    <path
-                      d="M13.765 2.152C13.398 2 12.932 2 12 2s-1.398 0-1.765.152a2 2 0 0 0-1.083 1.083c-.092.223-.129.484-.143.863a1.62 1.62 0 0 1-.79 1.353a1.62 1.62 0 0 1-1.567.008c-.336-.178-.579-.276-.82-.308a2 2 0 0 0-1.478.396C4.04 5.79 3.806 6.193 3.34 7s-.7 1.21-.751 1.605a2 2 0 0 0 .396 1.479c.148.192.355.353.676.555c.473.297.777.803.777 1.361s-.304 1.064-.777 1.36c-.321.203-.529.364-.676.556a2 2 0 0 0-.396 1.479c.052.394.285.798.75 1.605c.467.807.7 1.21 1.015 1.453a2 2 0 0 0 1.479.396c.24-.032.483-.13.819-.308a1.62 1.62 0 0 1 1.567.008c.483.28.77.795.79 1.353c.014.38.05.64.143.863a2 2 0 0 0 1.083 1.083C10.602 22 11.068 22 12 22s1.398 0 1.765-.152a2 2 0 0 0 1.083-1.083c.092-.223.129-.483.143-.863c.02-.558.307-1.074.79-1.353a1.62 1.62 0 0 1 1.567-.008c.336.178.579.276.819.308a2 2 0 0 0 1.479-.396c.315-.242.548-.646 1.014-1.453s.7-1.21.751-1.605a2 2 0 0 0-.396-1.479c-.148-.192-.355-.353-.676-.555A1.62 1.62 0 0 1 19.562 12c0-.558.304-1.064.777-1.36c.321-.203.529-.364.676-.556a2 2 0 0 0 .396-1.479c-.052-.394-.285-.798-.75-1.605c-.467-.807-.7-1.21-1.015-1.453a2 2 0 0 0-1.479-.396c-.24.032-.483.13-.82.308a1.62 1.62 0 0 1-1.566-.008a1.62 1.62 0 0 1-.79-1.353c-.014-.38-.05-.64-.143-.863a2 2 0 0 0-1.083-1.083Z"
-                    />
-                  </g>
+                  <path
+                    fill="currentColor"
+                    fill-rule="evenodd"
+                    d="M17.707 20.707a1 1 0 0 1-1.414 0l-4-4A1 1 0 0 1 13 15h3V4a1 1 0 1 1 2 0v11h3a1 1 0 0 1 .707 1.707zm-10-17.414a1 1 0 0 0-1.414 0l-4 4A1 1 0 0 0 3 9h3v11a1 1 0 1 0 2 0V9h3a1 1 0 0 0 .707-1.707z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
-                <span class="hidden sm:block">Options</span>
+                <span class="hidden sm:block">{{ $t("btn.swap") }}</span>
               </div>
               <!-- copy output text area button -->
               <div
@@ -358,7 +363,7 @@ function compilePipeline() {
                     mask="url(#SVGUpRmCb0d)"
                   />
                 </svg>
-                <span class="hidden sm:block">Copy</span>
+                <span class="hidden sm:block">{{ $t("btn.copy") }}</span>
               </div>
               <!-- clear text boxes button -->
               <div
@@ -386,7 +391,7 @@ function compilePipeline() {
                     />
                   </g>
                 </svg>
-                <span class="hidden sm:block">Clear</span>
+                <span class="hidden sm:block">{{ $t("btn.clear") }}</span>
               </div>
               <!-- clear pipeline button -->
               <div
@@ -404,7 +409,7 @@ function compilePipeline() {
                     d="M6 13h12c.55 0 1-.45 1-1s-.45-1-1-1H6c-.55 0-1 .45-1 1s.45 1 1 1m-2 4h12c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1s.45 1 1 1m3-9c0 .55.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1H8c-.55 0-1 .45-1 1"
                   />
                 </svg>
-                <span class="hidden sm:block">Reset</span>
+                <span class="hidden sm:block">{{ $t("btn.reset") }}</span>
               </div>
               <!-- Run button -->
               <div
@@ -431,27 +436,64 @@ function compilePipeline() {
                     />
                   </g>
                 </svg>
-                <span class="hidden sm:block">Cook</span>
+                <span class="hidden sm:block">{{ $t("btn.cook") }}</span>
               </div>
             </div>
           </div>
           <!-- right bottom part -->
           <!-- Operation Bar -->
           <div
-            class="h-1/2 w-full flex items-center justify-between bg-primary/40 text-primary-content/80 gap-1 px-1 overflow-x-auto"
+            class="h-1/2 w-full flex items-center justify-between bg-primary/40 text-primary-content/80 gap-1 overflow-x-auto"
           >
+            <!-- tree button -->
+            <div
+              class="p-1 px-2 bg-primary/40 text-primary-content flex items-center gap-1"
+              @click="showRecepiePipelineTree = true"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 48 48"
+              >
+                <defs>
+                  <mask id="SVGXH65VdQg">
+                    <g
+                      fill="none"
+                      stroke="#fff"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="4"
+                    >
+                      <path
+                        fill="#555555"
+                        d="M42 36V20H14v16a6 6 0 0 0 6 6h16a6 6 0 0 0 6-6"
+                      />
+                      <path d="M4 20h40M18 8v4m10-6v6m10-4v4" />
+                    </g>
+                  </mask>
+                </defs>
+                <path
+                  fill="currentColor"
+                  d="M0 0h48v48H0z"
+                  mask="url(#SVGXH65VdQg)"
+                />
+              </svg>
+              <span class="hidden sm:block">{{ $t("btn.recepies") }}</span>
+            </div>
             <!-- Module chips -->
             <div
-              class="flex-1 py-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth whitespace-nowrap select-none flex-shrink-0"
+              class="flex-1 py-1 pr-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth whitespace-nowrap select-none flex-shrink-0"
             >
+              <!-- middle modules list -->
               <div
                 v-for="(m, index) in recepiePipeline"
                 @click="showRecepieOptions(m)"
-                class="px-2 rounded-sm text-sm flex items-center justify-center"
+                class="px-2 rounded-sm text-xs p-1 flex items-center justify-center"
                 :class="
                   index % 2 === 0
-                    ? 'bg-success/80 text-success-content/80'
-                    : 'bg-warning/80 text-warning-content/80'
+                    ? 'bg-success/70 text-success-content/80'
+                    : 'bg-warning/70 text-warning-content/80'
                 "
               >
                 {{ m.name }}
@@ -519,6 +561,19 @@ function compilePipeline() {
         :recepiePipeline
         :close="() => (showRecepiePipelineTree = false)"
       />
+    </Transition>
+
+    <!-- sidebar -->
+    <Transition name="slide-right">
+      <div
+        v-if="showSideBar"
+        class="fixed w-full h-full top-0 left-0 bg-base-300/40"
+        @click="showSideBar = false"
+      >
+        <div @click.stop class="h-full w-3/4 sm:w-1/2 bg-base-300">
+          <Sidebar />
+        </div>
+      </div>
     </Transition>
   </div>
 </template>
@@ -589,5 +644,30 @@ function compilePipeline() {
 .slide-up-leave-to {
   opacity: 0;
   transform: translateY(40px);
+}
+
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.25s ease;
+}
+
+.slide-right-enter-from {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+.slide-right-enter-to {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.slide-right-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(-40px);
 }
 </style>

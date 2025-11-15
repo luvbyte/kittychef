@@ -2,29 +2,37 @@
 import { computed } from "vue";
 
 const props = defineProps<{
-  text: string; // text
+  text: string | any; // accept any type safely
   label?: string;
-  showBytes?: boolean; // show bytes
-  showLines?: boolean; // show lines
+  showBytes?: boolean;
+  showLines?: boolean;
 }>();
 
-// chars count computed
-const charCount = computed(() => props.text.length);
+// safe normalized text → ALWAYS a string
+const safeText = computed(() => {
+  if (props.text === null || props.text === undefined) return "";
+  return String(props.text);
+});
 
+// chars
+const charCount = computed(() => safeText.value.length);
+
+// words
 const wordCount = computed(() => {
-  const t = props.text.trim();
+  const t = safeText.value.trim();
   if (!t) return 0;
-  // split on whitespace
   return t.split(/\s+/).length;
 });
 
+// lines
 const lineCount = computed(() => {
-  if (!props.text) return 0;
-  return props.text.split(/\r?\n/).length;
+  if (!safeText.value) return 0;
+  return safeText.value.split(/\r?\n/).length;
 });
 
+// bytes
 const byteSize = computed(() => {
-  return new TextEncoder().encode(props.text).length;
+  return new TextEncoder().encode(safeText.value).length;
 });
 </script>
 
@@ -38,18 +46,21 @@ const byteSize = computed(() => {
     </div>
 
     <div class="flex gap-2 items-center">
-      <span class="px-2 py-0.5 rounded bg-base-200"
-        >Chars: <strong class="ml-1">{{ charCount }}</strong></span
-      >
-      <span class="px-2 py-0.5 rounded bg-base-200"
-        >Words: <strong class="ml-1">{{ wordCount }}</strong></span
-      >
-      <span v-if="showLines !== false" class="px-2 py-0.5 rounded bg-base-200"
-        >Lines: <strong class="ml-1">{{ lineCount }}</strong></span
-      >
-      <span v-if="showBytes !== false" class="px-2 py-0.5 rounded bg-base-200"
-        >Bytes: <strong class="ml-1">{{ byteSize }}</strong></span
-      >
+      <span class="px-2 py-0.5 rounded bg-base-200">
+        {{ $t("insight.chars") }}: <strong class="ml-1">{{ charCount }}</strong>
+      </span>
+
+      <span class="px-2 py-0.5 rounded bg-base-200">
+        {{ $t("insight.words") }}: <strong class="ml-1">{{ wordCount }}</strong>
+      </span>
+
+      <span v-if="showLines !== false" class="px-2 py-0.5 rounded bg-base-200">
+        {{ $t("insight.lines") }}: <strong class="ml-1">{{ lineCount }}</strong>
+      </span>
+
+      <span v-if="showBytes !== false" class="px-2 py-0.5 rounded bg-base-200">
+        {{ $t("insight.bytes") }}: <strong class="ml-1">{{ byteSize }}</strong>
+      </span>
     </div>
   </div>
 </template>

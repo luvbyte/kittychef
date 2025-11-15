@@ -1,0 +1,22 @@
+{
+  "app": {
+    "title": "KittyChef"
+  },
+  "btn": {
+    "theme": "Theme",
+    "live": "Live",
+    "add": "Add",
+    "recepies": "Recepies",
+    "swap": "Swap",
+    "copy": "Copy",
+    "clear": "Clear",
+    "reset": "Reset",
+    "cook": "Cook"
+  },
+  "insight": {
+    "chars": "Chars",
+    "words": "Words",
+    "lines": "Lines",
+    "bytes": "Bytes"
+  }
+}

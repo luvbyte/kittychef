@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
-
 const props = defineProps<{
   module: any;
 }>();
@@ -13,7 +11,6 @@ const emit = defineEmits(["update"]);
     <h3 class="font-bold text-lg mb-2">{{ module.name }} Options</h3>
 
     <div v-for="(opt, key) in module.options" :key="key" class="mb-3">
-
       <label class="block text-sm font-medium mb-1">{{ opt.label }}</label>
 
       <!-- Text -->
