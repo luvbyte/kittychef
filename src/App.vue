@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref, watch } from "vue";
 
 import Insight from "@/components/Insight.vue";
@@ -21,10 +21,10 @@ const outputBox = ref("");
 
 const recepiePipeline = ref([]);
 const selectedModule = ref(null);
-const selectedModuleIndex = ref<number | null>(null);
+const selectedModuleIndex = ref(null);
 
 // Live Update
-let stopWatcher: (() => void) | null = null;
+let stopWatcher = null;
 
 watch(
   () => liveUpdate.value,
@@ -233,225 +233,234 @@ function compilePipeline() {
         </div>
       </div>
 
-      <div
-        class="h-8 w-full bg-secondary/60 text-secondary-content/80 flex justify-between items-center"
-      >
-        <!-- live update toggle btn -->
-        <div
-          class="h-full w-[2.6rem] sm:w-22 flex items-center justify-center transition gap-2"
-          :class="
-            liveUpdate
-              ? 'bg-secondary/80 text-secondary-content'
-              : 'bg-secondary/20'
-          "
-          @click="liveUpdate = !liveUpdate"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 14 14"
-          >
-            <path
-              fill="currentColor"
-              fill-rule="evenodd"
-              d="M7.009 1.75q-.78 0-1.443.117A.625.625 0 1 1 5.352.636A9.7 9.7 0 0 1 7.009.5c2.053 0 3.746.56 4.928 1.703C13.122 3.35 13.707 5 13.707 7c0 1.133-.188 2.152-.565 3.032l.523.275a.625.625 0 0 1 .129 1.017c-.694.628-1.534.867-2.46.708a.63.63 0 0 1-.344-.181c-.652-.675-.909-1.502-.74-2.42a.625.625 0 0 1 .905-.441l.875.46c.277-.683.426-1.497.426-2.45c0-1.76-.508-3.047-1.388-3.898c-.883-.854-2.226-1.352-4.06-1.352m-6.803.933c.692-.627 1.53-.865 2.455-.707a.63.63 0 0 1 .344.182c.65.672.906 1.498.738 2.415a.625.625 0 0 1-.905.44l-.856-.449c-.273.68-.42 1.49-.42 2.436c0 1.76.508 3.047 1.388 3.898c.883.854 2.225 1.352 4.059 1.352q.819 0 1.51-.129a.625.625 0 1 1 .226 1.23q-.816.15-1.736.15c-2.053 0-3.746-.56-4.928-1.704C.896 10.65.31 9 .31 7c0-1.127.186-2.142.56-3.019l-.536-.28a.625.625 0 0 1-.13-1.018M7.015 3.74c.386-.343.964-.05.964.441v2.104h1.193c.476 0 .765.537.482.931c-.804 1.12-1.632 2.124-2.668 3.044c-.385.343-.963.051-.963-.44V7.714H4.829a.589.589 0 0 1-.482-.93C5.151 5.664 5.98 4.66 7.015 3.74"
-              clip-rule="evenodd"
-            />
-          </svg>
-          <span class="hidden sm:block">Live</span>
-        </div>
-
-        <!-- remaining (emoticon) -->
-        <div class="flex-1">
-          <Emoticon />
-        </div>
-
-        <div class="h-full flex items-center">
-          <!-- options button -->
+      <!-- middle bar -->
+      <div class="h-16 flex">
+        <!-- left part -->
+        <div class="flex flex-col h-full min-w-10 sm:min-w-22">
+          <!-- live update button -->
           <div
-            class="h-full px-2 bg-info/40 text-info-content active:bg-info flex items-center justify-center gap-1"
+            class="h-1/2 w-full flex items-center justify-center transition gap-2"
+            :class="
+              liveUpdate
+                ? 'bg-secondary/80 text-secondary-content'
+                : 'bg-secondary/60'
+            "
+            @click="liveUpdate = !liveUpdate"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
-              viewBox="0 0 24 24"
+              viewBox="0 0 14 14"
             >
-              <g fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="12" r="3" />
-                <path
-                  d="M13.765 2.152C13.398 2 12.932 2 12 2s-1.398 0-1.765.152a2 2 0 0 0-1.083 1.083c-.092.223-.129.484-.143.863a1.62 1.62 0 0 1-.79 1.353a1.62 1.62 0 0 1-1.567.008c-.336-.178-.579-.276-.82-.308a2 2 0 0 0-1.478.396C4.04 5.79 3.806 6.193 3.34 7s-.7 1.21-.751 1.605a2 2 0 0 0 .396 1.479c.148.192.355.353.676.555c.473.297.777.803.777 1.361s-.304 1.064-.777 1.36c-.321.203-.529.364-.676.556a2 2 0 0 0-.396 1.479c.052.394.285.798.75 1.605c.467.807.7 1.21 1.015 1.453a2 2 0 0 0 1.479.396c.24-.032.483-.13.819-.308a1.62 1.62 0 0 1 1.567.008c.483.28.77.795.79 1.353c.014.38.05.64.143.863a2 2 0 0 0 1.083 1.083C10.602 22 11.068 22 12 22s1.398 0 1.765-.152a2 2 0 0 0 1.083-1.083c.092-.223.129-.483.143-.863c.02-.558.307-1.074.79-1.353a1.62 1.62 0 0 1 1.567-.008c.336.178.579.276.819.308a2 2 0 0 0 1.479-.396c.315-.242.548-.646 1.014-1.453s.7-1.21.751-1.605a2 2 0 0 0-.396-1.479c-.148-.192-.355-.353-.676-.555A1.62 1.62 0 0 1 19.562 12c0-.558.304-1.064.777-1.36c.321-.203.529-.364.676-.556a2 2 0 0 0 .396-1.479c-.052-.394-.285-.798-.75-1.605c-.467-.807-.7-1.21-1.015-1.453a2 2 0 0 0-1.479-.396c-.24.032-.483.13-.82.308a1.62 1.62 0 0 1-1.566-.008a1.62 1.62 0 0 1-.79-1.353c-.014-.38-.05-.64-.143-.863a2 2 0 0 0-1.083-1.083Z"
-                />
-              </g>
-            </svg>
-            <span class="hidden sm:block">Options</span>
-          </div>
-          <!-- copy output text area button -->
-          <div
-            @click="copyOutputBox"
-            class="h-full px-2 bg-info/60 text-info-content active:bg-info flex items-center justify-center gap-1"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 48 48"
-            >
-              <defs>
-                <mask id="SVGUpRmCb0d">
-                  <g
-                    fill="none"
-                    stroke="#fff"
-                    stroke-linejoin="round"
-                    stroke-width="4"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      d="M13 12.432v-4.62A2.813 2.813 0 0 1 15.813 5h24.374A2.813 2.813 0 0 1 43 7.813v24.375A2.813 2.813 0 0 1 40.188 35h-4.672"
-                    />
-                    <path
-                      fill="#555555"
-                      d="M32.188 13H7.811A2.813 2.813 0 0 0 5 15.813v24.374A2.813 2.813 0 0 0 7.813 43h24.375A2.813 2.813 0 0 0 35 40.188V15.811A2.813 2.813 0 0 0 32.188 13Z"
-                    />
-                  </g>
-                </mask>
-              </defs>
               <path
                 fill="currentColor"
-                d="M0 0h48v48H0z"
-                mask="url(#SVGUpRmCb0d)"
+                fill-rule="evenodd"
+                d="M7.009 1.75q-.78 0-1.443.117A.625.625 0 1 1 5.352.636A9.7 9.7 0 0 1 7.009.5c2.053 0 3.746.56 4.928 1.703C13.122 3.35 13.707 5 13.707 7c0 1.133-.188 2.152-.565 3.032l.523.275a.625.625 0 0 1 .129 1.017c-.694.628-1.534.867-2.46.708a.63.63 0 0 1-.344-.181c-.652-.675-.909-1.502-.74-2.42a.625.625 0 0 1 .905-.441l.875.46c.277-.683.426-1.497.426-2.45c0-1.76-.508-3.047-1.388-3.898c-.883-.854-2.226-1.352-4.06-1.352m-6.803.933c.692-.627 1.53-.865 2.455-.707a.63.63 0 0 1 .344.182c.65.672.906 1.498.738 2.415a.625.625 0 0 1-.905.44l-.856-.449c-.273.68-.42 1.49-.42 2.436c0 1.76.508 3.047 1.388 3.898c.883.854 2.225 1.352 4.059 1.352q.819 0 1.51-.129a.625.625 0 1 1 .226 1.23q-.816.15-1.736.15c-2.053 0-3.746-.56-4.928-1.704C.896 10.65.31 9 .31 7c0-1.127.186-2.142.56-3.019l-.536-.28a.625.625 0 0 1-.13-1.018M7.015 3.74c.386-.343.964-.05.964.441v2.104h1.193c.476 0 .765.537.482.931c-.804 1.12-1.632 2.124-2.668 3.044c-.385.343-.963.051-.963-.44V7.714H4.829a.589.589 0 0 1-.482-.93C5.151 5.664 5.98 4.66 7.015 3.74"
+                clip-rule="evenodd"
               />
             </svg>
-            <span class="hidden sm:block">Copy</span>
+            <span class="hidden sm:block">Live</span>
           </div>
-          <!-- clear text boxes button -->
+          <!-- Recepie add button -->
           <div
-            @click="clearTextBoxes"
-            class="h-full px-2 bg-warning/60 text-warning-content active:bg-warning flex items-center justify-center gap-1"
+            class="h-1/2 w-full flex items-center bg-primary/80 text-primary-content justify-center gap-2"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 48 48"
-            >
-              <g
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="3"
+            <div @click="showRecepieBox = true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="26"
+                height="26"
+                viewBox="0 0 16 16"
               >
                 <path
-                  d="M5.185 31.954C6.529 26.914 10.638 23 15.854 23c4.895 0 8.164 4.425 8.056 9.32l-.057 2.569a7 7 0 0 0 2.097 5.154l1.106 1.086c1.586 1.557.66 4.224-1.555 4.408c-2.866.237-6.41.463-9.501.463c-3.982 0-7.963-.375-10.45-.666c-1.472-.172-2.558-1.428-2.417-2.902c.32-3.363 1.174-7.188 2.052-10.478"
+                  fill="currentColor"
+                  d="M8 15c-3.86 0-7-3.14-7-7s3.14-7 7-7s7 3.14 7 7s-3.14 7-7 7M8 2C4.69 2 2 4.69 2 8s2.69 6 6 6s6-2.69 6-6s-2.69-6-6-6"
                 />
-                <path
-                  d="M20 24.018c1.68-6.23 3.462-12.468 4.853-18.773c.219-.993-.048-2.01-1-2.365a8 8 0 0 0-.717-.226a8 8 0 0 0-.734-.162c-1.002-.17-1.742.578-2.048 1.547c-1.96 6.191-3.542 12.522-5.213 18.792M45 45H35m7-8H32m7-8H29m-18.951 8.75c-.167 1.5 0 5.2 2 8m5-7.75s0 5 2.951 7.5"
-                />
-              </g>
-            </svg>
-            <span class="hidden sm:block">Clear</span>
-          </div>
-          <!-- clear pipeline button -->
-          <div
-            @click="clearPipeline"
-            class="h-full px-2 bg-secondary/40 text-secondary-content active:bg-secondary flex items-center justify-center gap-1"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M6 13h12c.55 0 1-.45 1-1s-.45-1-1-1H6c-.55 0-1 .45-1 1s.45 1 1 1m-2 4h12c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1s.45 1 1 1m3-9c0 .55.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1H8c-.55 0-1 .45-1 1"
-              />
-            </svg>
-            <span class="hidden sm:block">Reset</span>
-          </div>
-          <!-- Run button -->
-          <div
-            @click="compilePipeline"
-            class="h-full px-2 bg-secondary/70 text-secondary-content active:bg-secondary flex items-center justify-center gap-1"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-            >
-              <g fill="none">
                 <path
                   fill="currentColor"
-                  fill-opacity="0.16"
-                  d="m5 3l16 9l-16 9z"
+                  d="M8 11.5c-.28 0-.5-.22-.5-.5V5c0-.28.22-.5.5-.5s.5.22.5.5v6c0 .28-.22.5-.5.5"
                 />
                 <path
-                  stroke="currentColor"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="m5 3l16 9l-16 9z"
+                  fill="currentColor"
+                  d="M11 8.5H5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h6c.28 0 .5.22.5.5s-.22.5-.5.5"
                 />
-              </g>
-            </svg>
-            <span class="hidden sm:block">Cook</span>
+              </svg>
+            </div>
+
+            <span class="hidden sm:block">Add</span>
           </div>
         </div>
-      </div>
-
-      <!-- Operation Bar -->
-      <div
-        class="h-8 flex items-center justify-between bg-primary/40 text-primary-content/80 gap-1"
-      >
-        <!-- Add button -->
-        <div
-          class="h-full flex items-center bg-primary/80 text-primary-content w-12 sm:w-25 justify-center gap-2"
-        >
-          <div @click="showRecepieBox = true">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="26"
-              height="26"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill="currentColor"
-                d="M8 15c-3.86 0-7-3.14-7-7s3.14-7 7-7s7 3.14 7 7s-3.14 7-7 7M8 2C4.69 2 2 4.69 2 8s2.69 6 6 6s6-2.69 6-6s-2.69-6-6-6"
-              />
-              <path
-                fill="currentColor"
-                d="M8 11.5c-.28 0-.5-.22-.5-.5V5c0-.28.22-.5.5-.5s.5.22.5.5v6c0 .28-.22.5-.5.5"
-              />
-              <path
-                fill="currentColor"
-                d="M11 8.5H5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h6c.28 0 .5.22.5.5s-.22.5-.5.5"
-              />
-            </svg>
-          </div>
-
-          <span class="hidden sm:block">Add</span>
-        </div>
-
-        <!-- Module chips -->
-        <div
-          class="w-full h-full py-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth whitespace-nowrap select-none"
-        >
+        <!-- right part -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <!-- right top part -->
           <div
-            v-for="(m, index) in recepiePipeline"
-            @click="showRecepieOptions(m)"
-            class="px-2 rounded-sm text-sm flex items-center justify-center"
-            :class="
-              index % 2 === 0
-                ? 'bg-success/80 text-success-content/80'
-                : 'bg-warning/80 text-warning-content/80'
-            "
+            class="h-1/2 w-full bg-secondary/60 text-secondary-content/80 flex justify-between items-center"
           >
-            {{ m.name }}
+            <!-- remaining (emoticon) -->
+            <div class="flex-1">
+              <Emoticon />
+            </div>
+
+            <div class="h-full flex items-center">
+              <!-- options button -->
+              <div
+                class="h-full px-2 bg-info/40 text-info-content active:bg-info flex items-center justify-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <g fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                      d="M13.765 2.152C13.398 2 12.932 2 12 2s-1.398 0-1.765.152a2 2 0 0 0-1.083 1.083c-.092.223-.129.484-.143.863a1.62 1.62 0 0 1-.79 1.353a1.62 1.62 0 0 1-1.567.008c-.336-.178-.579-.276-.82-.308a2 2 0 0 0-1.478.396C4.04 5.79 3.806 6.193 3.34 7s-.7 1.21-.751 1.605a2 2 0 0 0 .396 1.479c.148.192.355.353.676.555c.473.297.777.803.777 1.361s-.304 1.064-.777 1.36c-.321.203-.529.364-.676.556a2 2 0 0 0-.396 1.479c.052.394.285.798.75 1.605c.467.807.7 1.21 1.015 1.453a2 2 0 0 0 1.479.396c.24-.032.483-.13.819-.308a1.62 1.62 0 0 1 1.567.008c.483.28.77.795.79 1.353c.014.38.05.64.143.863a2 2 0 0 0 1.083 1.083C10.602 22 11.068 22 12 22s1.398 0 1.765-.152a2 2 0 0 0 1.083-1.083c.092-.223.129-.483.143-.863c.02-.558.307-1.074.79-1.353a1.62 1.62 0 0 1 1.567-.008c.336.178.579.276.819.308a2 2 0 0 0 1.479-.396c.315-.242.548-.646 1.014-1.453s.7-1.21.751-1.605a2 2 0 0 0-.396-1.479c-.148-.192-.355-.353-.676-.555A1.62 1.62 0 0 1 19.562 12c0-.558.304-1.064.777-1.36c.321-.203.529-.364.676-.556a2 2 0 0 0 .396-1.479c-.052-.394-.285-.798-.75-1.605c-.467-.807-.7-1.21-1.015-1.453a2 2 0 0 0-1.479-.396c-.24.032-.483.13-.82.308a1.62 1.62 0 0 1-1.566-.008a1.62 1.62 0 0 1-.79-1.353c-.014-.38-.05-.64-.143-.863a2 2 0 0 0-1.083-1.083Z"
+                    />
+                  </g>
+                </svg>
+                <span class="hidden sm:block">Options</span>
+              </div>
+              <!-- copy output text area button -->
+              <div
+                @click="copyOutputBox"
+                class="h-full px-2 bg-info/60 text-info-content active:bg-info flex items-center justify-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 48 48"
+                >
+                  <defs>
+                    <mask id="SVGUpRmCb0d">
+                      <g
+                        fill="none"
+                        stroke="#fff"
+                        stroke-linejoin="round"
+                        stroke-width="4"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          d="M13 12.432v-4.62A2.813 2.813 0 0 1 15.813 5h24.374A2.813 2.813 0 0 1 43 7.813v24.375A2.813 2.813 0 0 1 40.188 35h-4.672"
+                        />
+                        <path
+                          fill="#555555"
+                          d="M32.188 13H7.811A2.813 2.813 0 0 0 5 15.813v24.374A2.813 2.813 0 0 0 7.813 43h24.375A2.813 2.813 0 0 0 35 40.188V15.811A2.813 2.813 0 0 0 32.188 13Z"
+                        />
+                      </g>
+                    </mask>
+                  </defs>
+                  <path
+                    fill="currentColor"
+                    d="M0 0h48v48H0z"
+                    mask="url(#SVGUpRmCb0d)"
+                  />
+                </svg>
+                <span class="hidden sm:block">Copy</span>
+              </div>
+              <!-- clear text boxes button -->
+              <div
+                @click="clearTextBoxes"
+                class="h-full px-2 bg-warning/60 text-warning-content active:bg-warning flex items-center justify-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 48 48"
+                >
+                  <g
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="3"
+                  >
+                    <path
+                      d="M5.185 31.954C6.529 26.914 10.638 23 15.854 23c4.895 0 8.164 4.425 8.056 9.32l-.057 2.569a7 7 0 0 0 2.097 5.154l1.106 1.086c1.586 1.557.66 4.224-1.555 4.408c-2.866.237-6.41.463-9.501.463c-3.982 0-7.963-.375-10.45-.666c-1.472-.172-2.558-1.428-2.417-2.902c.32-3.363 1.174-7.188 2.052-10.478"
+                    />
+                    <path
+                      d="M20 24.018c1.68-6.23 3.462-12.468 4.853-18.773c.219-.993-.048-2.01-1-2.365a8 8 0 0 0-.717-.226a8 8 0 0 0-.734-.162c-1.002-.17-1.742.578-2.048 1.547c-1.96 6.191-3.542 12.522-5.213 18.792M45 45H35m7-8H32m7-8H29m-18.951 8.75c-.167 1.5 0 5.2 2 8m5-7.75s0 5 2.951 7.5"
+                    />
+                  </g>
+                </svg>
+                <span class="hidden sm:block">Clear</span>
+              </div>
+              <!-- clear pipeline button -->
+              <div
+                @click="clearPipeline"
+                class="h-full px-2 bg-secondary/40 text-secondary-content active:bg-secondary flex items-center justify-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M6 13h12c.55 0 1-.45 1-1s-.45-1-1-1H6c-.55 0-1 .45-1 1s.45 1 1 1m-2 4h12c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1s.45 1 1 1m3-9c0 .55.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1H8c-.55 0-1 .45-1 1"
+                  />
+                </svg>
+                <span class="hidden sm:block">Reset</span>
+              </div>
+              <!-- Run button -->
+              <div
+                @click="compilePipeline"
+                class="h-full px-2 bg-secondary/70 text-secondary-content active:bg-secondary flex items-center justify-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <g fill="none">
+                    <path
+                      fill="currentColor"
+                      fill-opacity="0.16"
+                      d="m5 3l16 9l-16 9z"
+                    />
+                    <path
+                      stroke="currentColor"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="m5 3l16 9l-16 9z"
+                    />
+                  </g>
+                </svg>
+                <span class="hidden sm:block">Cook</span>
+              </div>
+            </div>
+          </div>
+          <!-- right bottom part -->
+          <!-- Operation Bar -->
+          <div
+            class="h-1/2 w-full flex items-center justify-between bg-primary/40 text-primary-content/80 gap-1 px-1 overflow-x-auto"
+          >
+            <!-- Module chips -->
+            <div
+              class="flex-1 py-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth whitespace-nowrap select-none flex-shrink-0"
+            >
+              <div
+                v-for="(m, index) in recepiePipeline"
+                @click="showRecepieOptions(m)"
+                class="px-2 rounded-sm text-sm flex items-center justify-center"
+                :class="
+                  index % 2 === 0
+                    ? 'bg-success/80 text-success-content/80'
+                    : 'bg-warning/80 text-warning-content/80'
+                "
+              >
+                {{ m.name }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
       <!-- Output -->
 
       <div class="flex-1 bg-base-100 flex flex-col">

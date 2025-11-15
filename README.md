@@ -67,6 +67,7 @@ git clone https://github.com/luvbyte/kittychef.git
 cd kittychef
 
 pnpm install
+
 pnpm run dev
 
 Visit:
@@ -95,9 +96,7 @@ Instant insights
 
 📸 Screenshots
 
-
-docs/kittychef-preview.jpg
-
+![Screenshot](docs/kittychef-preview.jpg)
 
 ---
 

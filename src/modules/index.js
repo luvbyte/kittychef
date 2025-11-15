@@ -214,12 +214,12 @@ export const modules = [
     }
   },
   {
-  id: "lowercase",
-  name: "Lowercase",
-  category: "Text",
-  options: {},
-  run(input) {
-    return input.toLowerCase();
+    id: "lowercase",
+    name: "Lowercase",
+    category: "Text",
+    options: {},
+    run(input) {
+      return input.toLowerCase();
+    }
   }
-}
 ];

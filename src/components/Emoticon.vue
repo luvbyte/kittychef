@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-const emoticonsList = [
+const emoticonsList: string[] = [
   "( ꜆⌯' '⌯)꜆♡",
   "( ⊃🌹⊂ )",
   "╰(⸝⸝⸝´꒳`⸝⸝⸝)╯",
@@ -9,11 +9,11 @@ const emoticonsList = [
   "ᡕᠵ᠊ᡃ࡚ࠢ࠘ ⸝່ࠡࠣ᠊߯᠆ࠣ࠘ᡁࠣ࠘᠊᠊ࠢ࠘𐡏 💕"
 ];
 
-const emoticon = ref(emoticonsList[0]);
+const emoticon = ref<string>(emoticonsList[0]);
 
-let index = 0;
+let index: number = 0;
 
-function nextEmoticon() {
+function nextEmoticon(): void {
   index = (index + 1) % emoticonsList.length;
   emoticon.value = emoticonsList[index];
 }

@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 
 // All daisyui themes
-const themes = [
+const themes: string[] = [
   "light",
   "dark",
   "cupcake",
@@ -40,14 +40,14 @@ const themes = [
   "silk"
 ];
 
-const currentTheme = ref("dracula");
+const currentTheme = ref<string>("dracula");
 
 // Apply theme to #app
 const applyTheme = theme => {
   currentTheme.value = theme;
   localStorage.setItem("theme", theme);
 
-  document.getElementById("app")?.setAttribute("data-theme", theme);
+  document.getElementById("main")?.setAttribute("data-theme", theme);
 };
 
 onMounted(() => {
