@@ -1,6 +1,6 @@
 {
   "name": "kittychef",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "engines": {
@@ -11,8 +11,7 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build",
-    "validate": "node scripts/validate-modules.mjs"
+    "type-check": "vue-tsc --build"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",

@@ -54,13 +54,18 @@ function showRecepieOptions(m) {
   selectedModule.value = recepiePipeline.value[idx];
 }
 
-// grouping
-function groupModulesByCategory(mods) {
-  return mods.reduce((groups, mod) => {
-    if (!groups[mod.category]) groups[mod.category] = [];
+function groupModulesByCategory(modsObj) {
+  const groups = {};
+
+  for (const id in modsObj) {
+    const mod = modsObj[id];
+    if (!groups[mod.category]) {
+      groups[mod.category] = [];
+    }
     groups[mod.category].push(mod);
-    return groups;
-  }, {});
+  }
+
+  return groups;
 }
 
 // clone module object
@@ -112,7 +117,7 @@ function toggleLiveUpdate() {
   compilePipeline();
 }
 
-// compile pipeline and display in output box
+// Start Compile pipeline and display in output box
 function compilePipeline() {
   let result = Promise.resolve(inputBox.value);
 
@@ -146,7 +151,7 @@ function compilePipeline() {
   >
     <!-- Header -->
     <div
-      class="relative bg-primary/20 text-primary p-2 flex justify-between items-center shadow-lg"
+      class="relative bg-primary/20 text-primary p-2 py-3 flex justify-between items-center shadow-lg"
     >
       <div @click="showSideBar = true" class="flex items-center gap-1">
         <svg
@@ -213,10 +218,10 @@ function compilePipeline() {
       </div>
 
       <!-- Theme switcher -->
-      <Transition name="slide-up">
+      <Transition name="slide-left">
         <div
           v-show="showThemeSwitcher"
-          class="absolute top-11 right-0 w-3/4 max-h-[50svh] overflow-y-auto"
+          class="absolute top-13 right-0 w-3/4 max-h-[50svh] overflow-y-auto"
         >
           <ThemeSwitcher />
         </div>
@@ -236,20 +241,20 @@ function compilePipeline() {
           inputmode="text"
           class="flex-1 resize-none p-1 bg-base-100/20 text-base-content/60 focus:outline-none"
         ></textarea>
-        <!-- quick insight -->
+        <!-- Quick Insight -->
         <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
           <Insight :text="inputBox" showLines showBytes />
         </div>
       </div>
 
-      <!-- middle bar -->
-      <div class="h-16 flex">
+      <!-- Middle Bar -->
+      <div class="h-18 flex border-b border-primary/60">
         <!-- left part -->
-        <div class="flex flex-col h-full min-w-10 sm:min-w-22">
+        <div class="flex flex-col h-full min-w-10 sm:min-w-32">
           <!-- live update button -->
           <div
             class="h-1/2 w-full flex items-center justify-center transition gap-1 text-secondary-content"
-            :class="liveUpdate ? 'bg-secondary/80 ' : 'bg-secondary/60'"
+            :class="liveUpdate ? 'bg-secondary/80' : 'bg-secondary/60'"
             @click="toggleLiveUpdate"
           >
             <svg
@@ -267,31 +272,28 @@ function compilePipeline() {
             </svg>
             <span class="hidden sm:block">{{ $t("btn.live") }}</span>
           </div>
-          <!-- Recepie add button -->
+          <!-- Recepie tree button -->
           <div
             class="h-1/2 w-full flex items-center bg-primary/80 text-primary-content justify-center gap-2"
           >
-            <div class="flex gap-1 items-center" @click="showRecepieBox = true">
+            <div
+              class="flex gap-1 items-center"
+              @click="showRecepiePipelineTree = true"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="26"
-                height="26"
-                viewBox="0 0 16 16"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
               >
                 <path
-                  fill="currentColor"
-                  d="M8 15c-3.86 0-7-3.14-7-7s3.14-7 7-7s7 3.14 7 7s-3.14 7-7 7M8 2C4.69 2 2 4.69 2 8s2.69 6 6 6s6-2.69 6-6s-2.69-6-6-6"
-                />
-                <path
-                  fill="currentColor"
-                  d="M8 11.5c-.28 0-.5-.22-.5-.5V5c0-.28.22-.5.5-.5s.5.22.5.5v6c0 .28-.22.5-.5.5"
-                />
-                <path
-                  fill="currentColor"
-                  d="M11 8.5H5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h6c.28 0 .5.22.5.5s-.22.5-.5.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  d="M4 1h6v6H4zm12 10h4v4h-4zm0 8h4v4h-4zM7 7v14h9m-9-8h9"
                 />
               </svg>
-              <span class="hidden sm:block">{{ $t("btn.add") }}</span>
+              <span class="hidden sm:block">{{ $t("btn.recepies") }}</span>
             </div>
           </div>
         </div>
@@ -445,10 +447,10 @@ function compilePipeline() {
           <div
             class="h-1/2 w-full flex items-center justify-between bg-primary/40 text-primary-content/80 gap-1 overflow-x-auto"
           >
-            <!-- tree button -->
+            <!-- Recepie add button -->
             <div
-              class="p-1 px-2 bg-primary/40 text-primary-content flex items-center gap-1"
-              @click="showRecepiePipelineTree = true"
+              class="h-full px-2 bg-primary/40 text-primary-content flex items-center gap-1"
+              @click="showRecepieBox = true"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -456,30 +458,17 @@ function compilePipeline() {
                 height="24"
                 viewBox="0 0 48 48"
               >
-                <defs>
-                  <mask id="SVGXH65VdQg">
-                    <g
-                      fill="none"
-                      stroke="#fff"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="4"
-                    >
-                      <path
-                        fill="#555555"
-                        d="M42 36V20H14v16a6 6 0 0 0 6 6h16a6 6 0 0 0 6-6"
-                      />
-                      <path d="M4 20h40M18 8v4m10-6v6m10-4v4" />
-                    </g>
-                  </mask>
-                </defs>
-                <path
-                  fill="currentColor"
-                  d="M0 0h48v48H0z"
-                  mask="url(#SVGXH65VdQg)"
-                />
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linejoin="round"
+                  stroke-width="4"
+                >
+                  <rect width="36" height="36" x="6" y="6" rx="3" />
+                  <path stroke-linecap="round" d="M24 16v16m-8-8h16" />
+                </g>
               </svg>
-              <span class="hidden sm:block">{{ $t("btn.recepies") }}</span>
+              <span class="hidden sm:block">{{ $t("btn.add") }}</span>
             </div>
             <!-- Module chips -->
             <div
@@ -489,11 +478,11 @@ function compilePipeline() {
               <div
                 v-for="(m, index) in recepiePipeline"
                 @click="showRecepieOptions(m)"
-                class="px-2 rounded-sm text-xs p-1 flex items-center justify-center"
+                class="px-2 rstyle text-xs p-0.5 flex items-center justify-center border shadow-lg"
                 :class="
                   index % 2 === 0
-                    ? 'bg-success/70 text-success-content/80'
-                    : 'bg-warning/70 text-warning-content/80'
+                    ? 'bg-success/70 text-success-content/80 border-success-content/30'
+                    : 'bg-warning/70 text-warning-content/80 border-warning-content/30'
                 "
               >
                 {{ m.name }}
@@ -531,7 +520,7 @@ function compilePipeline() {
       >
         <div
           @click.stop
-          class="w-full min-h-[50svh] bg-base-100 border rstyle border-base-content/60 overflow-y-auto"
+          class="w-full min-h-[25rem] sm:min-h-[50%] sm:w-[50%] bg-base-100 border rstyle border-base-content/60 overflow-y-auto"
         >
           <RecepieOptions
             :module="selectedModule"
@@ -545,6 +534,16 @@ function compilePipeline() {
       </div>
     </Transition>
 
+    <!-- recepie pipeline tree ( development ) -->
+    <Transition name="fade-scale">
+      <RecepiePipelineTree
+        v-if="showRecepiePipelineTree"
+        :recepiePipeline
+        :clearPipeline
+        :close="() => (showRecepiePipelineTree = false)"
+        :addRecepie="() => (showRecepieBox = true)"
+      />
+    </Transition>
     <!-- RecepieBox Modal -->
     <Transition name="fade-scale">
       <RecepieBox
@@ -554,15 +553,6 @@ function compilePipeline() {
         :close="() => (showRecepieBox = false)"
       />
     </Transition>
-    <!-- recepie pipeline tree ( development ) -->
-    <Transition name="fade-scale">
-      <RecepiePipelineTree
-        v-if="showRecepiePipelineTree"
-        :recepiePipeline
-        :close="() => (showRecepiePipelineTree = false)"
-      />
-    </Transition>
-
     <!-- sidebar -->
     <Transition name="slide-right">
       <div
@@ -669,5 +659,30 @@ function compilePipeline() {
 .slide-right-leave-to {
   opacity: 0;
   transform: translateX(-40px);
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.25s ease;
+}
+
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(40px);
+}
+
+.slide-left-enter-to {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.slide-left-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(40px);
 }
 </style>

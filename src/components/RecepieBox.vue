@@ -26,11 +26,10 @@ const openCategory = ref<string | null>(null);
 function toggle(category: string) {
   // When searching, ignore manual toggling
   if (search.value.trim()) return;
-
   openCategory.value = openCategory.value === category ? null : category;
 }
 
-// expansion
+// Expansion
 const isOpen = (category: string) => {
   if (search.value.trim()) return true; // Auto-expand all during search
   return openCategory.value === category;
@@ -47,7 +46,7 @@ function selectModule(m) {
   <div class="absolute h-screen w-screen flex flex-col bg-base-100 gap-2 p-2">
     <!-- Header -->
     <div class="flex justify-between items-center mb-2 py-2">
-      <!--left side Header + Icon -->
+      <!--Left side Header + Icon -->
       <div class="flex justify-between items-center gap-1">
         <div>
           <svg
@@ -71,9 +70,9 @@ function selectModule(m) {
             />
           </svg>
         </div>
-        <div class="font-bold pt-1">Select a Recepie</div>
+        <div class="font-bold pt-1">{{ $t("headings.select_a_recepie") }}</div>
       </div>
-      <!-- close button -->
+      <!-- Close Button -->
       <div @click="props.close" class="pt-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"

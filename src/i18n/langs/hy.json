@@ -18,5 +18,12 @@
     "words": "Բառակապակցություններ",
     "lines": "Տողեր",
     "bytes": "Բայթեր"
+  },
+  "sidebar": {
+    "language": "Լեզու"
+  },
+  "headings": {
+    "select_a_recepie": "Ընտրեք բաղադրատոմս",
+    "recepies": "Բաղադրատոմսեր"
   }
 }

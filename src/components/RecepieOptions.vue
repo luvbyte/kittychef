@@ -10,10 +10,19 @@ const emit = defineEmits(["update"]);
   <div class="p-4 w-full">
     <h3 class="font-bold text-lg mb-2">{{ module.name }} Options</h3>
 
-    <div v-for="(opt, key) in module.options" :key="key" class="mb-3">
-      <label class="block text-sm font-medium mb-1">{{ opt.label }}</label>
+    <div
+      v-for="(opt, key) in module.options"
+      :key="key"
+      class="flex gap-2 mb-2"
+      :class="
+        opt.type != 'checkbox'
+          ? 'flex-col '
+          : 'flex-row flex-row-reverse justify-end items-center '
+      "
+    >
+      <label class="text-sm font-medium">{{ opt.label }}</label>
 
-      <!-- Text -->
+      <!-- TEXT -->
       <input
         v-if="opt.type === 'text'"
         type="text"
@@ -23,7 +32,7 @@ const emit = defineEmits(["update"]);
         @input="e => emit('update', { key, value: e.target.value })"
       />
 
-      <!-- Select -->
+      <!-- SELECT -->
       <select
         v-if="opt.type === 'select'"
         class="select select-bordered w-full"
@@ -33,7 +42,7 @@ const emit = defineEmits(["update"]);
         <option v-for="c in opt.choices" :key="c">{{ c }}</option>
       </select>
 
-      <!-- Number -->
+      <!-- NUMBER -->
       <input
         v-if="opt.type === 'number'"
         type="number"
@@ -43,7 +52,7 @@ const emit = defineEmits(["update"]);
         @input="e => emit('update', { key, value: Number(e.target.value) })"
       />
 
-      <!-- Checkbox -->
+      <!-- CHECKBOX -->
       <input
         v-if="opt.type === 'checkbox'"
         type="checkbox"

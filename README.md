@@ -96,29 +96,22 @@ Instant insights
 
 📸 Screenshots
 
-![Screenshot](docs/kittychef-preview.jpg)
+![Screenshot](docs/screenshots/ss-1.jpg)
+![Screenshot](docs/screenshots/ss-2.jpg)
+![Screenshot](docs/screenshots/ss-3.jpg)
+![Screenshot](docs/screenshots/ss-4.jpg)
 
 ---
 
 🔮 Roadmap
 
-[ ] Drag & drop pipeline ordering
-
 [ ] Quick Utils (trim / sort / dedupe)
 
-[ ] Save / load recipes
+[ ✓ ] Save / load recipes
 
 [ ] Auto-detect encoding
 
-[ ] JWT decoder
-
-[ ] Gzip / Inflate support
-
 [ ] Binary inspector
-
-[ ] Image to Base64 tools
-
-
 
 ---
 

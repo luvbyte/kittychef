@@ -2,7 +2,7 @@
 import { computed } from "vue";
 
 const props = defineProps<{
-  text: string | any; // accept any type safely
+  text: string | any; 
   label?: string;
   showBytes?: boolean;
   showLines?: boolean;
@@ -45,21 +45,21 @@ const byteSize = computed(() => {
       {{ label }}
     </div>
 
-    <div class="flex gap-2 items-center">
+    <div class="flex gap-2 items-center *:shadow-lg">
       <span class="px-2 py-0.5 rounded bg-base-200">
-        {{ $t("insight.chars") }}: <strong class="ml-1">{{ charCount }}</strong>
+        {{ $t("insight.chars") }}<strong class="ml-1">{{ charCount }}</strong>
       </span>
 
       <span class="px-2 py-0.5 rounded bg-base-200">
-        {{ $t("insight.words") }}: <strong class="ml-1">{{ wordCount }}</strong>
+        {{ $t("insight.words") }} <strong class="ml-1">{{ wordCount }}</strong>
       </span>
 
       <span v-if="showLines !== false" class="px-2 py-0.5 rounded bg-base-200">
-        {{ $t("insight.lines") }}: <strong class="ml-1">{{ lineCount }}</strong>
+        {{ $t("insight.lines") }} <strong class="ml-1">{{ lineCount }}</strong>
       </span>
 
       <span v-if="showBytes !== false" class="px-2 py-0.5 rounded bg-base-200">
-        {{ $t("insight.bytes") }}: <strong class="ml-1">{{ byteSize }}</strong>
+        {{ $t("insight.bytes") }} <strong class="ml-1">{{ byteSize }}</strong>
       </span>
     </div>
   </div>

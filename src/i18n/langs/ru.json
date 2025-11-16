@@ -18,5 +18,12 @@
     "words": "Слова",
     "lines": "Строки",
     "bytes": "Байты"
+  },
+  "sidebar": {
+    "language": "Язык"
+  },
+  "headings": {
+    "select_a_recepie": "Выберите рецепт",
+    "recepies": "Рецепты"
   }
 }

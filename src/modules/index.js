@@ -1,5 +1,5 @@
-export const modules = [
-  {
+export const modules = {
+  base64_encode: {
     id: "base64_encode",
     name: "Base64 Encode",
     category: "Encoding",
@@ -25,7 +25,7 @@ export const modules = [
       return output;
     }
   },
-  {
+  base64_decode: {
     id: "base64_decode",
     name: "Base64 Decode",
     category: "Encoding",
@@ -60,7 +60,7 @@ export const modules = [
       return atob(text);
     }
   },
-  {
+  url_encode: {
     id: "url_encode",
     name: "URL Encode",
     category: "Encoding",
@@ -84,7 +84,7 @@ export const modules = [
       return out;
     }
   },
-  {
+  url_decode: {
     id: "url_decode",
     name: "URL Decode",
     category: "Encoding",
@@ -107,7 +107,7 @@ export const modules = [
       return decodeURIComponent(text);
     }
   },
-  {
+  hex_encode: {
     id: "hex_encode",
     name: "Hex Encode",
     category: "Encoding",
@@ -132,7 +132,7 @@ export const modules = [
       return hex;
     }
   },
-  {
+  hex_decode: {
     id: "hex_decode",
     name: "Hex Decode",
     category: "Encoding",
@@ -150,7 +150,7 @@ export const modules = [
       return out;
     }
   },
-  {
+  rot13: {
     id: "rot13",
     name: "ROT13",
     category: "Ciphers",
@@ -167,7 +167,7 @@ export const modules = [
       );
     }
   },
-  {
+  xor: {
     id: "xor",
     name: "XOR",
     category: "Crypto",
@@ -193,7 +193,7 @@ export const modules = [
       return out;
     }
   },
-  {
+  reverse: {
     id: "reverse",
     name: "Reverse Text",
     category: "Text",
@@ -204,7 +204,7 @@ export const modules = [
       return input.split("").reverse().join("");
     }
   },
-  {
+  uppercase: {
     id: "uppercase",
     name: "Uppercase",
     category: "Text",
@@ -213,7 +213,7 @@ export const modules = [
       return input.toUpperCase();
     }
   },
-  {
+  lowercase: {
     id: "lowercase",
     name: "Lowercase",
     category: "Text",
@@ -224,7 +224,7 @@ export const modules = [
   },
 
   // Pretty JSON
-  {
+  json_pretty: {
     id: "json_pretty",
     name: "JSON Pretty Print",
     category: "JSON",
@@ -250,7 +250,7 @@ export const modules = [
       }
     }
   },
-  {
+  json_minify: {
     id: "json_minify",
     name: "JSON Minify",
     category: "JSON",
@@ -267,7 +267,7 @@ export const modules = [
     }
   },
 
-  {
+  xml_pretty: {
     id: "xml_pretty",
     name: "XML Pretty Print",
     category: "XML",
@@ -307,7 +307,7 @@ export const modules = [
     }
   },
 
-  {
+  xml_minify: {
     id: "xml_minify",
     name: "XML Minify",
     category: "XML",
@@ -321,7 +321,7 @@ export const modules = [
         .trim();
     }
   },
-  {
+  jwt_decode: {
     id: "jwt_decode",
     name: "JWT Decode",
     category: "Crypto",
@@ -355,7 +355,7 @@ export const modules = [
     }
   },
 
-  {
+  sha256: {
     id: "sha256",
     name: "SHA-256 Hash",
     category: "Hashing",
@@ -383,7 +383,7 @@ export const modules = [
     }
   },
 
-  {
+  html_encode: {
     id: "html_encode",
     name: "HTML Encode",
     category: "Web",
@@ -400,7 +400,7 @@ export const modules = [
     }
   },
 
-  {
+  html_decode: {
     id: "html_decode",
     name: "HTML Decode",
     category: "Web",
@@ -417,7 +417,7 @@ export const modules = [
     }
   },
 
-  {
+  base32_encode: {
     id: "base32_encode",
     name: "Base32 Encode",
     category: "Encoding",
@@ -442,7 +442,7 @@ export const modules = [
       return out;
     }
   },
-  {
+  base32_decode: {
     id: "base32_decode",
     name: "Base32 Decode",
     category: "Encoding",
@@ -468,7 +468,7 @@ export const modules = [
     }
   },
 
-  {
+  uuid_v4: {
     id: "uuid_v4",
     name: "UUID v4 Generate",
     category: "Utilities",
@@ -496,7 +496,7 @@ export const modules = [
       );
     }
   },
-  {
+  csv_to_json: {
     id: "csv_to_json",
     name: "CSV → JSON",
     category: "Data",
@@ -533,7 +533,7 @@ export const modules = [
       }
     }
   },
-  {
+  json_to_csv: {
     id: "json_to_csv",
     name: "JSON → CSV",
     category: "Data",
@@ -552,7 +552,7 @@ export const modules = [
       }
     }
   },
-  {
+  regex_extract: {
     id: "regex_extract",
     name: "Regex Extract",
     category: "Regex",
@@ -580,7 +580,7 @@ export const modules = [
       }
     }
   },
-  {
+  regex_replace: {
     id: "regex_replace",
     name: "Regex Replace",
     category: "Regex",
@@ -597,7 +597,7 @@ export const modules = [
       }
     }
   },
-  {
+  line_sort: {
     id: "line_sort",
     name: "Sort Lines",
     category: "Text Utils",
@@ -614,7 +614,7 @@ export const modules = [
       return lines.join("\n");
     }
   },
-  {
+  remove_blank_lines: {
     id: "remove_blank_lines",
     name: "Remove Blank Lines",
     category: "Text Utils",
@@ -626,7 +626,7 @@ export const modules = [
         .join("\n");
     }
   },
-  {
+  unique_lines: {
     id: "unique_lines",
     name: "Unique Lines",
     category: "Text Utils",
@@ -635,7 +635,7 @@ export const modules = [
       return [...new Set(input.split(/\r?\n/))].join("\n");
     }
   },
-  {
+  password_generator: {
     id: "password_generator",
     name: "Password Generator",
     category: "Utilities",
@@ -659,7 +659,7 @@ export const modules = [
       return out;
     }
   },
-  {
+  html_to_text: {
     id: "html_to_text",
     name: "HTML → Text",
     category: "Web",
@@ -674,7 +674,7 @@ export const modules = [
     }
   },
 
-  {
+  aes_encrypt: {
     id: "aes_encrypt",
     name: "AES Encrypt (AES-GCM)",
     category: "Crypto",
@@ -730,7 +730,7 @@ export const modules = [
       }
     }
   },
-  {
+  aes_decrypt_gcm: {
     id: "aes_decrypt_gcm",
     name: "AES Decrypt (AES-GCM)",
     category: "Crypto",
@@ -786,7 +786,7 @@ export const modules = [
     }
   },
 
-  {
+  markdown_to_html: {
     id: "markdown_to_html",
     name: "Markdown → HTML",
     category: "Web",
@@ -807,7 +807,7 @@ export const modules = [
       return html.trim();
     }
   },
-  {
+  html_to_md: {
     id: "html_to_md",
     name: "HTML → Markdown",
     category: "Web",
@@ -829,7 +829,7 @@ export const modules = [
         .trim();
     }
   },
-  {
+  base58_encode: {
     id: "base58_encode",
     name: "Base58 Encode",
     category: "Encoding",
@@ -854,7 +854,7 @@ export const modules = [
       return out;
     }
   },
-  {
+  base58_decode: {
     id: "base58_decode",
     name: "Base58 Decode",
     category: "Encoding",
@@ -882,7 +882,7 @@ export const modules = [
       return out;
     }
   },
-  {
+  hex_to_rgb: {
     id: "hex_to_rgb",
     name: "HEX → RGB",
     category: "Color",
@@ -910,7 +910,7 @@ export const modules = [
       return `rgb(${r}, ${g}, ${b})`;
     }
   },
-  {
+  rgb_to_hex: {
     id: "rgb_to_hex",
     name: "RGB → HEX",
     category: "Color",
@@ -932,7 +932,7 @@ export const modules = [
       );
     }
   },
-  {
+  text_to_binary: {
     id: "text_to_binary",
     name: "Text → Binary",
     category: "Encoding",
@@ -945,7 +945,7 @@ export const modules = [
         .join(" ");
     }
   },
-  {
+  binary_to_text: {
     id: "binary_to_text",
     name: "Binary → Text",
     category: "Encoding",
@@ -959,7 +959,7 @@ export const modules = [
         .join("");
     }
   },
-  {
+  diff: {
     id: "diff",
     name: "Diff Text (line by line)",
     category: "Text Utils",
@@ -995,7 +995,7 @@ export const modules = [
   },
 
   // MySQL -> PostgreSQL converter module
-  {
+  mysql_to_postgres: {
     id: "mysql_to_postgres",
     name: "MySQL → PostgreSQL",
     category: "SQL",
@@ -1162,7 +1162,7 @@ export const modules = [
   },
 
   // PostgreSQL -> MySQL converter module
-  {
+  postgres_to_mysql: {
     id: "postgres_to_mysql",
     name: "PostgreSQL → MySQL",
     category: "SQL",
@@ -1272,4 +1272,4 @@ export const modules = [
       return sql;
     }
   }
-];
+};

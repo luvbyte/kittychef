@@ -18,5 +18,12 @@
     "words": "शब्द",
     "lines": "पंक्तियाँ",
     "bytes": "बाइट्स"
+  },
+  "sidebar": {
+    "language": "भाषा"
+  },
+  "headings": {
+    "select_a_recepie": "एक रेसिपी चुनें",
+    "recepies": "रेसिपी"
   }
 }

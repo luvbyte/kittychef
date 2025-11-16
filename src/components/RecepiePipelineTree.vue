@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { ref } from "vue";
+
+import { modules } from "@/modules";
+
 const props = defineProps<{
   recepiePipeline: any[];
+  clearPipeline: () => void;
+  addRecepie: () => void;
   close: () => void;
 }>();
-
-import { ref } from "vue";
 
 const openIndex = ref<number | null>(null);
 
@@ -27,6 +31,83 @@ function moveDown(i: number) {
 function removeItem(i: number) {
   props.recepiePipeline.splice(i, 1);
 }
+
+// EXPORT  (ONLY IDs + option values)
+function exportPipeline() {
+  const clean = props.recepiePipeline.map(mod => {
+    const opts = {};
+    for (const key in mod.options) {
+      opts[key] = mod.options[key].value;
+    }
+    return {
+      id: mod.id,
+      options: opts
+    };
+  });
+
+  const data = JSON.stringify(clean, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "kittychef_pipeline.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// IMPORT (REBUILD FROM modules OBJECT)
+function importPipeline() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+
+  input.onchange = async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const imported = JSON.parse(text);
+
+      if (!Array.isArray(imported)) {
+        alert("Invalid pipeline file");
+        return;
+      }
+
+      const rebuilt = imported
+        .map(item => {
+          const base = modules[item.id]; // lookup module
+          if (!base) return null;
+
+          // shallow clone module WITHOUT destroying run() function
+          const modClone = {
+            ...base,
+            options: {}
+          };
+
+          // options
+          for (const key in base.options) {
+            modClone.options[key] = {
+              ...base.options[key],
+              value: item.options?.[key] ?? base.options[key].default ?? ""
+            };
+          }
+
+          return modClone;
+        })
+        .filter(Boolean); // remove nulls
+
+      props.recepiePipeline.splice(0, props.recepiePipeline.length, ...rebuilt);
+
+      alert("Pipeline imported successfully!");
+    } catch (err) {
+      alert("Failed to import pipeline: " + err.message);
+    }
+  };
+
+  input.click();
+}
 </script>
 
 <template>
@@ -39,8 +120,8 @@ function removeItem(i: number) {
       <div class="flex items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="22"
-          height="22"
+          width="24"
+          height="24"
           viewBox="0 0 24 24"
         >
           <path
@@ -50,11 +131,122 @@ function removeItem(i: number) {
             d="M4 1h6v6H4zm12 10h4v4h-4zm0 8h4v4h-4zM7 7v14h9m-9-8h9"
           />
         </svg>
-        <div class="font-bold text-lg">Recepie Pipeline</div>
+        <div class="font-bold text-lg pt-1">{{ $t("headings.recepies") }}</div>
       </div>
 
       <!-- Close button -->
-      <button @click="props.close" class="btn btn-sm btn-ghost">✕</button>
+      <div @click="props.close">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 32 32"
+        >
+          <path
+            fill="currentColor"
+            d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
+          />
+          <path
+            fill="currentColor"
+            d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <div class="flex justify-between gap-1 px-2 text-sm font-medium">
+      <div class="flex gap-1 items-center">
+        <!-- Clear -->
+        <button
+          @click="clearPipeline"
+          class="px-3 py-1 bg-error/80 text-error-content rounded shadow-lg active:bg-error transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M4 17q-.425 0-.712-.288T3 16t.288-.712T4 15h12q.425 0 .713.288T17 16t-.288.713T16 17zm2-4q-.425 0-.712-.288T5 12t.288-.712T6 11h12q.425 0 .713.288T19 12t-.288.713T18 13zm2-4q-.425 0-.712-.288T7 8t.288-.712T8 7h12q.425 0 .713.288T21 8t-.288.713T20 9z"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <!-- IMPORT -->
+        <button
+          @click="importPipeline"
+          class="flex items-center gap-1 px-3 py-1 bg-primary/80 text-primary-content rounded shadow-lg active:bg-primary transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <g
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-width="1.5"
+            >
+              <path d="M4 12a8 8 0 1 0 16 0" />
+              <path stroke-linejoin="round" d="M12 4v10m0 0l3-3m-3 3l-3-3" />
+            </g>
+          </svg>
+          <span>Import</span>
+        </button>
+
+        <!-- EXPORT -->
+        <button
+          @click="exportPipeline"
+          class="flex items-center gap-1 px-3 py-1 bg-secondary/80 text-secondary-content rounded shadow-lg active:bg-secondary transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <g
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-width="1.5"
+            >
+              <path d="M4 12a8 8 0 1 0 16 0" />
+              <path stroke-linejoin="round" d="M12 14V4m0 0l3 3m-3-3L9 7" />
+            </g>
+          </svg>
+          <span>Export</span>
+        </button>
+
+        <!-- ADD BTN -->
+        <button
+          @click="addRecepie"
+          class="px-3 py-1 bg-success/80 text-success-content rounded shadow-lg active:bg-success transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+          >
+            <g
+              fill="none"
+              stroke="currentColor"
+              stroke-linejoin="round"
+              stroke-width="4"
+            >
+              <rect width="36" height="36" x="6" y="6" rx="3" />
+              <path stroke-linecap="round" d="M24 16v16m-8-8h16" />
+            </g>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Pipeline List -->
@@ -62,7 +254,7 @@ function removeItem(i: number) {
       <div
         v-for="(mod, i) in props.recepiePipeline"
         :key="mod.id + i"
-        class="mb-2 p-2 rounded-xl bg-base-300 shadow-sm"
+        class="mb-2 p-1 rounded-xl bg-base-300 shadow-sm"
       >
         <!-- Module Row -->
         <div class="flex justify-between items-center">
@@ -71,7 +263,7 @@ function removeItem(i: number) {
           </div>
 
           <div class="flex items-center gap-1">
-            <!-- move up -->
+            <!-- Move up -->
             <button
               class="px-2 p-1 bg-primary text-primary-content rounded"
               @click="moveUp(i)"
@@ -90,7 +282,7 @@ function removeItem(i: number) {
               </svg>
             </button>
 
-            <!-- move down -->
+            <!-- Move down -->
             <button
               class="px-2 p-1 rounded bg-secondary text-secondary-content"
               @click="moveDown(i)"
@@ -109,7 +301,7 @@ function removeItem(i: number) {
               </svg>
             </button>
 
-            <!-- remove -->
+            <!-- Remove -->
             <button
               class="bg-error text-error-content p-1 rounded px-2"
               @click="removeItem(i)"
@@ -138,7 +330,7 @@ function removeItem(i: number) {
               </svg>
             </button>
 
-            <!-- expand -->
+            <!-- Expand -->
             <button @click="toggle(i)" class="p-1 px-2">
               <div
                 class="transition-transform duration-200"
@@ -165,7 +357,7 @@ function removeItem(i: number) {
         <!-- Options panel -->
         <div
           v-if="openIndex === i"
-          class="mt-2 p-2 bg-base-300 rounded-md text-xs flex flex-col gap-3"
+          class="mt-2 p-2 bg-base-300 rounded-md text-xs flex flex-col gap-2"
         >
           <div v-if="Object.keys(mod.options).length === 0" class="opacity-60">
             No options
@@ -174,9 +366,13 @@ function removeItem(i: number) {
           <div
             v-for="(opt, key) in mod.options"
             :key="key"
-            class="flex flex-col gap-1 p-2 bg-base-200 rounded-md"
+            class="flex gap-2 p-2 bg-base-200 rounded-md w-full"
+            :class="
+              opt.type != 'checkbox'
+                ? 'flex-col'
+                : 'flex-row flex-row-reverse justify-end'
+            "
           >
-            <!-- Label -->
             <label class="text-xs font-medium">{{ opt.label || key }}</label>
 
             <!-- TEXT -->
@@ -211,36 +407,15 @@ function removeItem(i: number) {
             />
 
             <!-- CHECKBOX -->
-            <label
+            <input
               v-if="opt.type === 'checkbox'"
-              class="flex items-center gap-2"
-            >
-              <input
-                type="checkbox"
-                class="checkbox checkbox-xs"
-                :checked="opt.value"
-                @change="e => (mod.options[key].value = e.target.checked)"
-              />
-              <span>{{ opt.label }}</span>
-            </label>
+              type="checkbox"
+              class="checkbox checkbox-xs"
+              :checked="opt.value"
+              @change="e => (mod.options[key].value = e.target.checked)"
+            />
           </div>
         </div>
-
-        <!-- Options panel
-        <div
-          v-if="openIndex === i"
-          class="mt-2 p-2 bg-base-300 rounded-md text-xs"
-        >
-          <div v-if="Object.keys(mod.options).length === 0" class="opacity-60">
-            No options
-          </div>
-
-          <div v-for="(opt, key) in mod.options" :key="key" class="py-1">
-            <strong>{{ key }}:</strong>
-            <span>{{ opt.value }}</span>
-          </div>
-        </div>
-        -->
       </div>
     </div>
   </div>

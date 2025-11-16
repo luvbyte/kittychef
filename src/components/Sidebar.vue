@@ -4,7 +4,7 @@
       <!-- Top -->
       <div class="w-full flex flex-col justify-center items-center">
         <div>
-          <!-- cat icon -->
+          <!-- Cat Icon -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="120"
@@ -30,11 +30,11 @@
             </g>
           </svg>
         </div>
-        <div class="mb-3">KittyChef - 0.0.1</div>
+        <div class="mb-3">{{ $t("app.title") }} - 0.0.1</div>
       </div>
-      <!-- languages select box -->
+      <!-- Languages select box -->
       <div class="flex flex-col bg-base-100 rounded-lg shadow-lg p-2 gap-2">
-        <div class="text-base-content/60">Language</div>
+        <div class="text-base-content/60">{{ $t("sidebar.language") }}</div>
         <select v-model="$i18n.locale" class="select outline-none select-sm">
           <option value="en">🇬🇧 English</option>
           <option value="hi">🇮🇳 हिन्दी</option>
@@ -48,7 +48,7 @@
         </select>
       </div>
 
-      <!-- social -->
+      <!-- Social -->
       <div class="flex flex-col bg-base-100 rounded-lg shadow-xl p-2">
         <div class="text-base-content/60 mb-3">SOCIAL</div>
 
@@ -105,7 +105,7 @@
           </div>
         </a>
       </div>
-      <!-- support -->
+      <!-- Support -->
       <div class="flex flex-col bg-base-100 rounded-lg shadow-xl p-2">
         <div class="text-base-content/60 mb-3">SUPPORT</div>
         <a
@@ -172,9 +172,15 @@
       </div>
     </div>
 
-    <!-- footer -->
-    <div class="text-center py-3 glow-text text-pink-600/80">
-      Made by luvbyte 💖
+    <!-- Footer -->
+
+    <div class="w-full flex justify-center items-center">
+      <pre class="text-xs text-pink-600/60 glow-text opacity-80 backdrop-blur">
+ /)/)        KIKKU
+(⌯'.')      💕
+(>ᡕᠵ᠊ᡃ࡚ࠢ࠘ ⸝່ࠡࠣ᠊߯᠆ࠣ࠘ᡁࠣ࠘᠊᠊ࠢ࠘𐡏💕
+/   \  Created By
+      </pre>
     </div>
   </div>
 </template>
@@ -182,9 +188,8 @@
 <style scoped>
 .glow-text {
   text-shadow:
-    0 0 5px #ff4dc4,
-    0 0 10px #ff4dc4,
-    0 0 15px #ff4dc4,
-    0 0 20px #ff4dc4;
+    0 0 1px #ff4dc4,
+    0 0 2px #ff4dc4,
+    0 0 3px #ff4dc4;
 }
 </style>

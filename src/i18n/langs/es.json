@@ -18,5 +18,12 @@
     "words": "Palabras",
     "lines": "Líneas",
     "bytes": "Bytes"
+  },
+  "sidebar": {
+    "language": "Idioma"
+  },
+  "headings": {
+    "select_a_recepie": "Selecciona una receta",
+    "recepies": "Recetas"
   }
 }

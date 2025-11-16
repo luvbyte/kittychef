@@ -40,9 +40,9 @@ const themes: string[] = [
   "silk"
 ];
 
-const currentTheme = ref<string>("dracula");
+const currentTheme = ref<string>("light");
 
-// Apply theme to #app
+// Apply theme to #main
 const applyTheme = theme => {
   currentTheme.value = theme;
   localStorage.setItem("theme", theme);
@@ -59,14 +59,14 @@ onMounted(() => {
 <template>
   <div
     @click.stop
-    class="w-full h-full bg-base-300 grid grid-cols-2 sm:grid-cols-3 gap-2 p-2"
+    class="w-full h-full bg-base-300/80 grid grid-cols-2 sm:grid-cols-3 gap-2 p-4"
   >
     <div
       v-for="theme in themes"
       :key="theme"
       :data-theme="theme"
       @click="applyTheme(theme)"
-      class="flex justify-between bg-primary text-primary-content p-1 rounded shadow cursor-pointe hover:shadow-md hover:-translate-y-0.5 transition-all"
+      class="flex justify-between bg-primary/80 text-primary-content p-1 rounded shadow-lg cursor-pointe hover:shadow-md hover:-translate-y-0.5 transition-all"
       :class="currentTheme === theme ? 'border border-white' : ''"
     >
       <span class="font-medium tracking-wide capitalize truncate">{{

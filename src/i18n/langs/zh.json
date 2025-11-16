@@ -18,5 +18,12 @@
     "words": "单词",
     "lines": "行数",
     "bytes": "字节"
+  },
+  "sidebar": {
+    "language": "语言"
+  },
+  "headings": {
+    "select_a_recepie": "选择一个食谱",
+    "recepies": "食谱"
   }
 }

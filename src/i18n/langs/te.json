@@ -18,5 +18,12 @@
     "words": "పదాలు",
     "lines": "లైన్లు",
     "bytes": "బైట్లు"
-  }
+  },
+  "sidebar": {
+    "language": "భాష"
+  },
+  "headings": {
+    "select_a_recepie": "ఒక వంటకం ఎంచుకోండి",
+    "recepies": "వంటకాలు"
+}
 }
