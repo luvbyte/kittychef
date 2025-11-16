@@ -25,5 +25,19 @@
   "headings": {
     "select_a_recepie": "एक रेसिपी चुनें",
     "recepies": "रेसिपी"
+  },
+  "text_utils": {
+    "copy": "कॉपी",
+    "paste": "पेस्ट",
+    "clear": "साफ़ करें",
+    "select": "चुनें",
+    "upper": "बड़े अक्षर",
+    "lower": "छोटे अक्षर",
+    "reverse": "उल्टा",
+    "trim": "ट्रिम",
+    "no_space": "स्पेस हटाएँ",
+    "no_blank_lines": "खाली लाइन हटाएँ",
+    "swap_case": "केस बदलें",
+    "timestamp": "टाइमस्टैम्प"
   }
 }

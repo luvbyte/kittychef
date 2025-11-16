@@ -25,5 +25,19 @@
   "headings": {
     "select_a_recepie": "Select a Recepie",
     "recepies": "Recepies"
+  },
+  "text_utils": {
+    "copy": "Copy",
+    "paste": "Pase",
+    "clear": "Clear",
+    "select": "Select",
+    "upper": "Upper",
+    "lower": "Lower",
+    "reverse": "Reverse",
+    "trim": "Trim",
+    "no_space": "NoSpace",
+    "no_blank_lines": "NoBlankLines",
+    "swap_case": "SwapCase",
+    "timestamp": "Timestamp"
   }
 }

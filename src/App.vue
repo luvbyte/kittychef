@@ -5,6 +5,7 @@ import Insight from "@/components/Insight.vue";
 import Sidebar from "@/components/Sidebar.vue";
 import Emoticon from "@/components/Emoticon.vue";
 import RecepieBox from "@/components/RecepieBox.vue";
+import TextAreaUtils from "@/components/TextAreaUtils.vue";
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
 import RecepieOptions from "@/components/RecepieOptions.vue";
 import RecepiePipelineTree from "@/components/RecepiePipelineTree.vue";
@@ -144,11 +145,7 @@ function compilePipeline() {
 </script>
 
 <template>
-  <div
-    id="main"
-    data-theme="light"
-    class="h-screen flex flex-col overflow-hidden"
-  >
+  <div id="main" data-theme="light" class="h-dvh flex flex-col overflow-hidden">
     <!-- Header -->
     <div
       class="relative bg-primary/20 text-primary p-2 py-3 flex justify-between items-center shadow-lg"
@@ -230,16 +227,20 @@ function compilePipeline() {
 
     <!-- Main Layout -->
     <div class="flex-1 flex flex-col">
+      <div class="p-1 py-2">
+        <TextAreaUtils v-model:text="inputBox" />
+      </div>
       <!-- Input -->
       <div class="flex-1 flex flex-col">
         <textarea
+          id="textarea-ref"
           v-model="inputBox"
           spellcheck="off"
           autocorrect="off"
           autocapitalize="off"
           autocomplete="off"
           inputmode="text"
-          class="flex-1 resize-none p-1 bg-base-100/20 text-base-content/60 focus:outline-none"
+          class="flex-1 resize-none px-1 bg-base-100/20 text-base-content/60 focus:outline-none"
         ></textarea>
         <!-- Quick Insight -->
         <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
@@ -248,7 +249,7 @@ function compilePipeline() {
       </div>
 
       <!-- Middle Bar -->
-      <div class="h-18 flex border-b border-primary/60">
+      <div class="min-h-18 flex border-b border-primary/60">
         <!-- left part -->
         <div class="flex flex-col h-full min-w-10 sm:min-w-32">
           <!-- live update button -->
@@ -497,7 +498,7 @@ function compilePipeline() {
       <div class="flex-1 bg-base-100 flex flex-col">
         <textarea
           v-model="outputBox"
-          @click="copyOutputBox"
+          @dblclick="copyOutputBox"
           readonly
           spellcheck="false"
           autocorrect="off"

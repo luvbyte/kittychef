@@ -25,5 +25,19 @@
   "headings": {
     "select_a_recepie": "Selecciona una receta",
     "recepies": "Recetas"
+  },
+  "text_utils": {
+    "copy": "Copiar",
+    "paste": "Pegar",
+    "clear": "Limpiar",
+    "select": "Seleccionar",
+    "upper": "Mayúsculas",
+    "lower": "Minúsculas",
+    "reverse": "Invertir",
+    "trim": "Recortar",
+    "no_space": "Sin espacios",
+    "no_blank_lines": "Sin líneas en blanco",
+    "swap_case": "Intercambiar mayúsculas/minúsculas",
+    "timestamp": "Marca de tiempo"
   }
 }

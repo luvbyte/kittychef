@@ -25,5 +25,19 @@
   "headings": {
     "select_a_recepie": "Wähle ein Rezept",
     "recepies": "Rezepte"
+  },
+  "text_utils": {
+    "copy": "Kopieren",
+    "paste": "Einfügen",
+    "clear": "Löschen",
+    "select": "Auswählen",
+    "upper": "Großbuchstaben",
+    "lower": "Kleinbuchstaben",
+    "reverse": "Umkehren",
+    "trim": "Trimmen",
+    "no_space": "Keine Leerzeichen",
+    "no_blank_lines": "Keine Leerzeilen",
+    "swap_case": "Groß-/Kleinschreibung wechseln",
+    "timestamp": "Zeitstempel"
   }
 }

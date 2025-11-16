@@ -105,7 +105,7 @@ Instant insights
 
 🔮 Roadmap
 
-[ ] Quick Utils (trim / sort / dedupe)
+[ ✓ ] Quick Utils (trim / sort / dedupe)
 
 [ ✓ ] Save / load recipes
 

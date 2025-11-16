@@ -30,7 +30,7 @@
             </g>
           </svg>
         </div>
-        <div class="mb-3">{{ $t("app.title") }} - 0.0.1</div>
+        <div class="mb-3">{{ $t("app.title") }} - 0.0.3</div>
       </div>
       <!-- Languages select box -->
       <div class="flex flex-col bg-base-100 rounded-lg shadow-lg p-2 gap-2">
