@@ -27,8 +27,9 @@
     "recepies": "Recepies"
   },
   "text_utils": {
+    "import": "Import",
     "copy": "Copy",
-    "paste": "Pase",
+    "paste": "Paste",
     "clear": "Clear",
     "select": "Select",
     "upper": "Upper",

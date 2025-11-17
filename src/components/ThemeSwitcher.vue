@@ -66,7 +66,7 @@ onMounted(() => {
       :key="theme"
       :data-theme="theme"
       @click="applyTheme(theme)"
-      class="flex justify-between bg-primary/80 text-primary-content p-1 rounded shadow-lg cursor-pointe hover:shadow-md hover:-translate-y-0.5 transition-all"
+      class="flex justify-between bg-primary/80 text-primary-content p-1 rounded shadow-lg cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all"
       :class="currentTheme === theme ? 'border border-white' : ''"
     >
       <span class="font-medium tracking-wide capitalize truncate">{{

@@ -27,6 +27,7 @@
     "recepies": "Recetas"
   },
   "text_utils": {
+    "import": "Importar",
     "copy": "Copiar",
     "paste": "Pegar",
     "clear": "Limpiar",
@@ -35,9 +36,9 @@
     "lower": "Minúsculas",
     "reverse": "Invertir",
     "trim": "Recortar",
-    "no_space": "Sin espacios",
-    "no_blank_lines": "Sin líneas en blanco",
-    "swap_case": "Intercambiar mayúsculas/minúsculas",
-    "timestamp": "Marca de tiempo"
+    "no_space": "SinEspacios",
+    "no_blank_lines": "EliminarLíneasVacías",
+    "swap_case": "IntercambiarMay/Min",
+    "timestamp": "MarcaDeTiempo"
   }
 }

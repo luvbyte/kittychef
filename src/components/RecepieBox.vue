@@ -138,7 +138,7 @@ function selectModule(m) {
             class="overflow-y-auto transition-[max-height] duration-300 px-2"
             :class="isOpen(category) ? 'max-h-96' : 'max-h-0'"
           >
-            <div class="flex flex-col gap-1 mt-1 mb-1">
+            <div class="flex flex-col gap-1 mt-1 mb-1 sm:grid sm:grid-cols-2 md:grid-cols-3">
               <button
                 v-for="m in mods"
                 :key="m.id"

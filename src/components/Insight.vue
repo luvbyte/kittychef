@@ -2,8 +2,7 @@
 import { computed } from "vue";
 
 const props = defineProps<{
-  text: string | any; 
-  label?: string;
+  text: string | any;
   showBytes?: boolean;
   showLines?: boolean;
 }>();
@@ -34,18 +33,29 @@ const lineCount = computed(() => {
 const byteSize = computed(() => {
   return new TextEncoder().encode(safeText.value).length;
 });
+
+// detect text encoding
+const encoding = computed(() => {
+  const text = safeText.value;
+
+  if (!text) return "ASCII";
+
+  const bytes = new TextEncoder().encode(text);
+
+  // ASCII check
+  if (bytes.every(b => b < 128)) return "ASCII";
+
+  return "UTF-8";
+});
 </script>
 
 <template>
-  <div class="flex items-center gap-3 text-xs text-base-content/70">
+  <div
+    class="w-full px-2 flex items-center justify-between gap-3 text-xs text-base-content/70"
+  >
     <div
-      v-if="label"
-      class="font-semibold text-sm pr-2 border-r border-base-300"
+      class="flex gap-2 items-center *:shadow-lg *:shrink-0 overflow-x-auto scrollbar-hide"
     >
-      {{ label }}
-    </div>
-
-    <div class="flex gap-2 items-center *:shadow-lg">
       <span class="px-2 py-0.5 rounded bg-base-200">
         {{ $t("insight.chars") }}<strong class="ml-1">{{ charCount }}</strong>
       </span>
@@ -62,5 +72,9 @@ const byteSize = computed(() => {
         {{ $t("insight.bytes") }} <strong class="ml-1">{{ byteSize }}</strong>
       </span>
     </div>
+
+    <span v-if="showBytes !== false" class="pl-2 py-0.5 rounded">
+      <strong>{{ encoding }}</strong>
+    </span>
   </div>
 </template>

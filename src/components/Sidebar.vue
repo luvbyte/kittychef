@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { usePWAInstall } from "@/composables/usePWAInstall";
+
+const { installPWA, isInstallable } = usePWAInstall();
+</script>
+
 <template>
   <div class="h-full w-full flex flex-col p-3">
     <div class="flex-1 flex flex-col gap-3">
@@ -30,9 +36,161 @@
             </g>
           </svg>
         </div>
-        <div class="mb-3">{{ $t("app.title") }} - 0.0.3</div>
+        <div class="mb-3">{{ $t("app.title") }} - 0.0.4</div>
       </div>
       <!-- Languages select box -->
+      <div
+        @click="installPWA"
+        v-if="isInstallable"
+        class="flex justify-between bg-primary/50 rounded-lg shadow-lg shadow-primary/50 p-2 gap-2"
+      >
+         Install App
+        <span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d="M4 16h4v4H4V16z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin=".2"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+            <path fill="currentColor" d="M10 16h4v4h-4V16z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin=".4"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+            <path fill="currentColor" d="M16 16h4v4h-4V16z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin=".6"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+            <path fill="currentColor" d="M4 10h4v4H4V10z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin=".8"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+            <path fill="currentColor" d="M10 10h4v4h-4V10z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin="1"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+            <path fill="currentColor" d="M16 10h4v4h-4V10z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin="1.2"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+            <path fill="currentColor" d="M4 4h4v4H4V4z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin="1.4"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+            <path fill="currentColor" d="M10 4h4v4h-4V4z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin="1.6"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+            <path fill="currentColor" d="M16 4h4v4h-4V4z" class="st0">
+              <animate
+                fill="remove"
+                accumulate="none"
+                additive="replace"
+                attributeName="opacity"
+                begin="1.8"
+                calcMode="linear"
+                dur="3s"
+                keyTimes="0;0.9;1"
+                repeatCount="indefinite"
+                restart="always"
+                values="1;0;0"
+              />
+            </path>
+          </svg>
+        </span>
+      </div>
+
       <div class="flex flex-col bg-base-100 rounded-lg shadow-lg p-2 gap-2">
         <div class="text-base-content/60">{{ $t("sidebar.language") }}</div>
         <select v-model="$i18n.locale" class="select outline-none select-sm">

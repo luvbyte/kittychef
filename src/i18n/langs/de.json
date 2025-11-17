@@ -27,17 +27,18 @@
     "recepies": "Rezepte"
   },
   "text_utils": {
+    "import": "Importieren",
     "copy": "Kopieren",
     "paste": "Einfügen",
-    "clear": "Löschen",
+    "clear": "Leeren",
     "select": "Auswählen",
     "upper": "Großbuchstaben",
     "lower": "Kleinbuchstaben",
     "reverse": "Umkehren",
     "trim": "Trimmen",
-    "no_space": "Keine Leerzeichen",
-    "no_blank_lines": "Keine Leerzeilen",
-    "swap_case": "Groß-/Kleinschreibung wechseln",
+    "no_space": "KeineLeerzeichen",
+    "no_blank_lines": "LeereZeilenEntfernen",
+    "swap_case": "Groß/Klein Wechseln",
     "timestamp": "Zeitstempel"
   }
 }

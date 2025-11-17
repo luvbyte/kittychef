@@ -27,6 +27,7 @@
     "recepies": "Recettes"
   },
   "text_utils": {
+    "import": "Importer",
     "copy": "Copier",
     "paste": "Coller",
     "clear": "Effacer",
@@ -35,9 +36,9 @@
     "lower": "Minuscules",
     "reverse": "Inverser",
     "trim": "Rogner",
-    "no_space": "Sans espace",
-    "no_blank_lines": "Sans lignes vides",
-    "swap_case": "Changer la casse",
+    "no_space": "SansEspaces",
+    "no_blank_lines": "SupprimerLignesVides",
+    "swap_case": "InverserCasse",
     "timestamp": "Horodatage"
   }
 }

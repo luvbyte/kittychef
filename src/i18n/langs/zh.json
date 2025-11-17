@@ -27,6 +27,7 @@
     "recepies": "食谱"
   },
   "text_utils": {
+    "import": "导入",
     "copy": "复制",
     "paste": "粘贴",
     "clear": "清除",
@@ -34,9 +35,9 @@
     "upper": "大写",
     "lower": "小写",
     "reverse": "反转",
-    "trim": "修剪",
+    "trim": "去空格",
     "no_space": "无空格",
-    "no_blank_lines": "无空行",
+    "no_blank_lines": "删除空行",
     "swap_case": "切换大小写",
     "timestamp": "时间戳"
   }

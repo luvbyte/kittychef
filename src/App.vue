@@ -150,7 +150,7 @@ function compilePipeline() {
     <div
       class="relative bg-primary/20 text-primary p-2 py-3 flex justify-between items-center shadow-lg"
     >
-      <div @click="showSideBar = true" class="flex items-center gap-1">
+      <button @click="showSideBar = true" class="flex items-center gap-1 hover:cursor-pointer">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -192,10 +192,10 @@ function compilePipeline() {
           </g>
         </svg>
         <h1 class="font-bold">{{ $t("app.title") }}</h1>
-      </div>
+      </button>
       <div class="flex gap-1 items-center">
-        <div
-          class="flex items-center gap-1"
+        <button
+          class="flex items-center gap-1 hover:cursor-pointer"
           @click="showThemeSwitcher = !showThemeSwitcher"
         >
           <svg
@@ -211,14 +211,14 @@ function compilePipeline() {
           </svg>
 
           <span class="hidden sm:block">{{ $t("btn.theme") }}</span>
-        </div>
+        </button>
       </div>
 
       <!-- Theme switcher -->
       <Transition name="slide-left">
         <div
           v-show="showThemeSwitcher"
-          class="absolute top-13 right-0 w-3/4 max-h-[50svh] overflow-y-auto"
+          class="absolute top-13 right-0 w-3/4 sm:w-1/3 max-h-[50svh] overflow-y-auto"
         >
           <ThemeSwitcher />
         </div>
@@ -253,8 +253,8 @@ function compilePipeline() {
         <!-- left part -->
         <div class="flex flex-col h-full min-w-10 sm:min-w-32">
           <!-- live update button -->
-          <div
-            class="h-1/2 w-full flex items-center justify-center transition gap-1 text-secondary-content"
+          <button
+            class="h-1/2 w-full flex items-center justify-center transition gap-1 text-secondary-content hover:cursor-pointer"
             :class="liveUpdate ? 'bg-secondary/80' : 'bg-secondary/60'"
             @click="toggleLiveUpdate"
           >
@@ -272,10 +272,10 @@ function compilePipeline() {
               />
             </svg>
             <span class="hidden sm:block">{{ $t("btn.live") }}</span>
-          </div>
+          </button>
           <!-- Recepie tree button -->
-          <div
-            class="h-1/2 w-full flex items-center bg-primary/80 text-primary-content justify-center gap-2"
+          <button
+            class="h-1/2 w-full flex items-center bg-primary/80 text-primary-content justify-center gap-2 hover:cursor-pointer"
           >
             <div
               class="flex gap-1 items-center"
@@ -296,7 +296,7 @@ function compilePipeline() {
               </svg>
               <span class="hidden sm:block">{{ $t("btn.recepies") }}</span>
             </div>
-          </div>
+          </button>
         </div>
         <!-- right part -->
         <div class="flex-1 flex flex-col overflow-hidden">
@@ -311,9 +311,9 @@ function compilePipeline() {
 
             <div class="h-full flex items-center">
               <!-- swap button -->
-              <div
+              <button
                 @click="swapTextBox"
-                class="h-full px-2 bg-info/40 text-info-content active:bg-info flex items-center justify-center gap-1"
+                class="h-full px-2 bg-info/40 text-info-content active:bg-info flex items-center justify-center gap-1 hover:cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -329,11 +329,11 @@ function compilePipeline() {
                   />
                 </svg>
                 <span class="hidden sm:block">{{ $t("btn.swap") }}</span>
-              </div>
+              </button>
               <!-- copy output text area button -->
-              <div
+              <button
                 @click="copyOutputBox"
-                class="h-full px-2 bg-info/60 text-info-content active:bg-info flex items-center justify-center gap-1"
+                class="h-full px-2 bg-info/60 text-info-content active:bg-info flex items-center justify-center gap-1 hover:cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -367,11 +367,11 @@ function compilePipeline() {
                   />
                 </svg>
                 <span class="hidden sm:block">{{ $t("btn.copy") }}</span>
-              </div>
+              </button>
               <!-- clear text boxes button -->
-              <div
+              <button
                 @click="clearTextBoxes"
-                class="h-full px-2 bg-warning/60 text-warning-content active:bg-warning flex items-center justify-center gap-1"
+                class="h-full px-2 bg-warning/60 text-warning-content active:bg-warning flex items-center justify-center gap-1 hover:cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -395,11 +395,11 @@ function compilePipeline() {
                   </g>
                 </svg>
                 <span class="hidden sm:block">{{ $t("btn.clear") }}</span>
-              </div>
+              </button>
               <!-- clear pipeline button -->
-              <div
+              <button
                 @click="clearPipeline"
-                class="h-full px-2 bg-secondary/40 text-secondary-content active:bg-secondary flex items-center justify-center gap-1"
+                class="h-full px-2 bg-secondary/40 text-secondary-content active:bg-secondary flex items-center justify-center gap-1 hover:cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -413,11 +413,11 @@ function compilePipeline() {
                   />
                 </svg>
                 <span class="hidden sm:block">{{ $t("btn.reset") }}</span>
-              </div>
+              </button>
               <!-- Run button -->
-              <div
+              <button
                 @click="compilePipeline"
-                class="h-full px-2 bg-secondary/70 text-secondary-content active:bg-secondary flex items-center justify-center gap-1"
+                class="h-full px-2 bg-secondary/70 text-secondary-content active:bg-secondary flex items-center justify-center gap-1 hover:cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -440,7 +440,7 @@ function compilePipeline() {
                   </g>
                 </svg>
                 <span class="hidden sm:block">{{ $t("btn.cook") }}</span>
-              </div>
+              </button>
             </div>
           </div>
           <!-- right bottom part -->
@@ -449,8 +449,8 @@ function compilePipeline() {
             class="h-1/2 w-full flex items-center justify-between bg-primary/40 text-primary-content/80 gap-1 overflow-x-auto"
           >
             <!-- Recepie add button -->
-            <div
-              class="h-full px-2 bg-primary/40 text-primary-content flex items-center gap-1"
+            <button
+              class="h-full px-2 bg-primary/40 text-primary-content flex items-center gap-1 hover:cursor-pointer"
               @click="showRecepieBox = true"
             >
               <svg
@@ -470,7 +470,7 @@ function compilePipeline() {
                 </g>
               </svg>
               <span class="hidden sm:block">{{ $t("btn.add") }}</span>
-            </div>
+            </button>
             <!-- Module chips -->
             <div
               class="flex-1 py-1 pr-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth whitespace-nowrap select-none flex-shrink-0"
@@ -479,7 +479,7 @@ function compilePipeline() {
               <div
                 v-for="(m, index) in recepiePipeline"
                 @click="showRecepieOptions(m)"
-                class="px-2 rstyle text-xs p-0.5 flex items-center justify-center border shadow-lg"
+                class="px-2 rstyle text-xs p-0.5 flex items-center justify-center border shadow-lg hover:cursor-pointer"
                 :class="
                   index % 2 === 0
                     ? 'bg-success/70 text-success-content/80 border-success-content/30'
@@ -561,7 +561,7 @@ function compilePipeline() {
         class="fixed w-full h-full top-0 left-0 bg-base-300/40"
         @click="showSideBar = false"
       >
-        <div @click.stop class="h-full w-3/4 sm:w-1/2 bg-base-300">
+        <div @click.stop class="h-full w-3/4 sm:w-1/3 bg-base-300">
           <Sidebar />
         </div>
       </div>
