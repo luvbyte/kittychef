@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { usePWAInstall } from "@/composables/usePWAInstall";
+  import { usePWAInstall } from "@/composables/usePWAInstall";
 
-const { installPWA, isInstallable } = usePWAInstall();
+  const { installPWA, isInstallable } = usePWAInstall();
 </script>
 
 <template>
-  <div class="h-full w-full flex flex-col p-3">
+  <div class="h-full w-full flex flex-col p-3 bg-base-100 font-heading">
     <div class="flex-1 flex flex-col gap-3">
       <!-- Top -->
       <div class="w-full flex flex-col justify-center items-center">
@@ -36,15 +36,15 @@ const { installPWA, isInstallable } = usePWAInstall();
             </g>
           </svg>
         </div>
-        <div class="mb-3">{{ $t("app.title") }} - 0.0.4</div>
+        <div class="mb-3">{{ $t("app.title") }} - 0.0.5</div>
       </div>
       <!-- Languages select box -->
       <div
         @click="installPWA"
         v-if="isInstallable"
-        class="flex justify-between bg-primary/50 rounded-lg shadow-lg shadow-primary/50 p-2 gap-2"
+        class="flex justify-between bg-primary/50 rounded-lg shadow-primary/50 p-2 gap-2"
       >
-         Install App
+        Install App
         <span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -191,7 +191,7 @@ const { installPWA, isInstallable } = usePWAInstall();
         </span>
       </div>
 
-      <div class="flex flex-col bg-base-100 rounded-lg shadow-lg p-2 gap-2">
+      <div class="flex flex-col rounded-lg p-2 gap-2">
         <div class="text-base-content/60">{{ $t("sidebar.language") }}</div>
         <select v-model="$i18n.locale" class="select outline-none select-sm">
           <option value="en">🇬🇧 English</option>
@@ -207,7 +207,7 @@ const { installPWA, isInstallable } = usePWAInstall();
       </div>
 
       <!-- Social -->
-      <div class="flex flex-col bg-base-100 rounded-lg shadow-xl p-2">
+      <div class="flex flex-col rounded-lg p-2">
         <div class="text-base-content/60 mb-3">SOCIAL</div>
 
         <a
@@ -262,9 +262,38 @@ const { installPWA, isInstallable } = usePWAInstall();
             </svg>
           </div>
         </a>
+        <div class="divider m-0"></div>
+        <a
+          href="https://kikku.vercel.app"
+          target="_blank"
+          class="flex justify-between items-center no-underline"
+        >
+          <div>Portfolio</div>
+          <div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 48 48"
+            >
+              <g fill="none" stroke="currentColor" stroke-width="3">
+                <path
+                  stroke-linejoin="round"
+                  d="M3.539 39.743c.208 2.555 2.163 4.51 4.718 4.718C11.485 44.723 16.636 45 24 45s12.515-.277 15.743-.539c2.555-.208 4.51-2.163 4.718-4.718C44.723 36.515 45 31.364 45 24s-.277-12.515-.539-15.743c-.208-2.555-2.163-4.51-4.718-4.718C36.515 3.277 31.364 3 24 3s-12.515.277-15.743.539c-2.555.208-4.51 2.163-4.718 4.718C3.277 11.485 3 16.636 3 24s.277 12.515.539 15.743Z"
+                />
+                <path stroke-linecap="round" d="M3.5 13.5h41" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M10 8.5h2m6 0h2"
+                />
+              </g>
+            </svg>
+          </div>
+        </a>
       </div>
       <!-- Support -->
-      <div class="flex flex-col bg-base-100 rounded-lg shadow-xl p-2">
+      <div class="flex flex-col rounded-lg p-2">
         <div class="text-base-content/60 mb-3">SUPPORT</div>
         <a
           href="/terms.html"
@@ -333,7 +362,7 @@ const { installPWA, isInstallable } = usePWAInstall();
     <!-- Footer -->
 
     <div class="w-full flex justify-center items-center">
-      <pre class="text-xs text-pink-600/60 glow-text opacity-80 backdrop-blur">
+      <pre class="text-sm opacity-80">
  /)/)        KIKKU
 (⌯'.')      💕
 (>ᡕᠵ᠊ᡃ࡚ࠢ࠘ ⸝່ࠡࠣ᠊߯᠆ࠣ࠘ᡁࠣ࠘᠊᠊ࠢ࠘𐡏💕
@@ -342,12 +371,3 @@ const { installPWA, isInstallable } = usePWAInstall();
     </div>
   </div>
 </template>
-
-<style scoped>
-.glow-text {
-  text-shadow:
-    0 0 1px #ff4dc4,
-    0 0 2px #ff4dc4,
-    0 0 3px #ff4dc4;
-}
-</style>

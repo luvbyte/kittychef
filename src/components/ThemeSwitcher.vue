@@ -59,7 +59,7 @@ onMounted(() => {
 <template>
   <div
     @click.stop
-    class="w-full h-full bg-base-300/80 grid grid-cols-2 sm:grid-cols-3 gap-2 p-4"
+    class="w-full h-full bg-base-300 grid grid-cols-2 sm:grid-cols-3 gap-2 p-4 font-heading"
   >
     <div
       v-for="theme in themes"

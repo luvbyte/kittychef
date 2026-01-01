@@ -11,13 +11,16 @@
     "copy": "कॉपी",
     "clear": "क्लियर",
     "reset": "रीसेट",
-    "cook": "कुक"
+    "cook": "कुक",
+    "output": "आउटपुट"
   },
   "insight": {
     "chars": "अक्षर",
     "words": "शब्द",
     "lines": "पंक्तियाँ",
-    "bytes": "बाइट्स"
+    "bytes": "बाइट्स",
+    "live": "लाइव",
+    "recepies": "रेसिपी"
   },
   "sidebar": {
     "language": "भाषा"

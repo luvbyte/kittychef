@@ -11,13 +11,16 @@
     "copy": "కాపీ",
     "clear": "క్లియర్",
     "reset": "రిసెట్",
-    "cook": "కుక్"
+    "cook": "కుక్",
+    "output": "అవుట్‌పుట్"
   },
   "insight": {
     "chars": "అక్షరాలు",
     "words": "పదాలు",
-    "lines": "లైన్లు",
-    "bytes": "బైట్లు"
+    "lines": "వరుసలు",
+    "bytes": "బైట్లు",
+    "live": "లైవ్",
+    "recepies": "వంటకాలు"
   },
   "sidebar": {
     "language": "భాష"

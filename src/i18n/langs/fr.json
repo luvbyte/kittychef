@@ -11,13 +11,16 @@
     "copy": "Copier",
     "clear": "Effacer",
     "reset": "Réinitialiser",
-    "cook": "Cuisiner"
+    "cook": "Cuisiner",
+    "output": "Sortie"
   },
   "insight": {
     "chars": "Caractères",
     "words": "Mots",
     "lines": "Lignes",
-    "bytes": "Octets"
+    "bytes": "Octets",
+    "live": "En direct",
+    "recepies": "Recettes"
   },
   "sidebar": {
     "language": "Langue"

@@ -1,107 +1,102 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
+  const props = defineProps<{
+    text: string;
+  }>();
 
-const props = defineProps<{
-  text: string;
-}>();
+  const emit = defineEmits(["update:text"]);
 
-const emit = defineEmits(["update:text"]);
+  const update = (val: string) => emit("update:text", val);
 
-const update = (val: string) => emit("update:text", val);
+  // IMPORT FILE
+  function importFile() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".txt,.json,.md,.csv,.log,.html,.xml,*/*";
 
+    input.onchange = async e => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-// IMPORT FILE
-function importFile() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = ".txt,.json,.md,.csv,.log,.html,.xml,*/*";
+      const text = await file.text();
 
-  input.onchange = async e => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+      // Replace OR append?
+      // You can decide. I use REPLACE (better for editing).
+      update(text);
 
-    const text = await file.text();
+      // If you want APPEND instead:
+      // update(props.text + "\n" + text);
+    };
 
-    // Replace OR append?  
-    // You can decide. I use REPLACE (better for editing).
-    update(text);
+    input.click();
+  }
 
-    // If you want APPEND instead:
-    // update(props.text + "\n" + text);
-  };
+  function copyText() {
+    navigator.clipboard.writeText(props.text || "");
+  }
 
-  input.click();
-}
+  function pasteText() {
+    navigator.clipboard.readText().then(pasted => {
+      update(props.text + pasted);
+    });
+  }
 
+  function clearText() {
+    update("");
+  }
 
-function copyText() {
-  navigator.clipboard.writeText(props.text || "");
-}
+  function selectAll() {
+    const el = document.getElementById("textarea-ref");
+    if (el) el.select();
+  }
 
-function pasteText() {
-  navigator.clipboard.readText().then(pasted => {
-    update(props.text + pasted);
-  });
-}
+  function toUppercase() {
+    update(props.text.toUpperCase());
+  }
 
-function clearText() {
-  update("");
-}
+  function toLowercase() {
+    update(props.text.toLowerCase());
+  }
 
-function selectAll() {
-  const el = document.getElementById("textarea-ref");
-  if (el) el.select();
-}
+  function reverseText() {
+    update(props.text.split("").reverse().join(""));
+  }
 
-function toUppercase() {
-  update(props.text.toUpperCase());
-}
+  function trimText() {
+    update(props.text.trim());
+  }
 
-function toLowercase() {
-  update(props.text.toLowerCase());
-}
+  function removeSpaces() {
+    update(props.text.replace(/\s+/g, ""));
+  }
 
-function reverseText() {
-  update(props.text.split("").reverse().join(""));
-}
+  function removeBlankLines() {
+    update(
+      props.text
+        .split(/\r?\n/)
+        .filter(l => l.trim() !== "")
+        .join("\n")
+    );
+  }
 
-function trimText() {
-  update(props.text.trim());
-}
+  function swapCase() {
+    update(
+      props.text
+        .split("")
+        .map(ch =>
+          ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase()
+        )
+        .join("")
+    );
+  }
 
-function removeSpaces() {
-  update(props.text.replace(/\s+/g, ""));
-}
-
-function removeBlankLines() {
-  update(
-    props.text
-      .split(/\r?\n/)
-      .filter(l => l.trim() !== "")
-      .join("\n")
-  );
-}
-
-function swapCase() {
-  update(
-    props.text
-      .split("")
-      .map(ch =>
-        ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase()
-      )
-      .join("")
-  );
-}
-
-function insertTimestamp() {
-  update(props.text + "\n" + new Date().toISOString());
-}
-
+  function insertTimestamp() {
+    update(props.text + "\n" + new Date().toISOString());
+  }
 </script>
 
 <template>
   <div
-    class="w-full flex gap-1 text-xs shrink-0 overflow-x-auto scroll-smooth scrollbar-hide"
+    class="w-full flex gap-1 text-xs shrink-0 overflow-x-auto scroll-smooth scrollbar-hide font-heading pb-1"
   >
     <button class="btn btn-xs btn-primary" @click="importFile">
       {{ $t("text_utils.import") }}

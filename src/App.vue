@@ -1,156 +1,176 @@
 <script setup>
-import { ref, watch } from "vue";
+  import { ref, watch } from "vue";
+  import { toggleFullScreen } from "./utils";
 
-import Insight from "@/components/Insight.vue";
-import Sidebar from "@/components/Sidebar.vue";
-import Emoticon from "@/components/Emoticon.vue";
-import RecepieBox from "@/components/RecepieBox.vue";
-import TextAreaUtils from "@/components/TextAreaUtils.vue";
-import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
-import RecepieOptions from "@/components/RecepieOptions.vue";
-import RecepiePipelineTree from "@/components/RecepiePipelineTree.vue";
+  import Insight from "@/components/Insight.vue";
+  import Sidebar from "@/components/Sidebar.vue";
+  import Emoticon from "@/components/Emoticon.vue";
+  import RecepieBox from "@/components/RecepieBox.vue";
+  import TextAreaUtils from "@/components/TextAreaUtils.vue";
+  import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
+  import RecepieOptions from "@/components/RecepieOptions.vue";
+  import RecepiePipelineTree from "@/components/RecepiePipelineTree.vue";
 
-import { modules } from "@/modules";
+  import { modules } from "@/modules";
 
-const showRecepieBox = ref(false);
-const showThemeSwitcher = ref(false);
-const showRecepiePipelineTree = ref(false);
+  const showRecepieBox = ref(false);
+  const showThemeSwitcher = ref(false);
+  const showRecepiePipelineTree = ref(false);
 
-const showSideBar = ref(false);
+  const showSideBar = ref(false);
 
-const liveUpdate = ref(true);
+  const inputFullScreen = ref(false);
 
-const inputBox = ref("");
-const outputBox = ref("");
+  const liveUpdate = ref(true);
 
-const recepiePipeline = ref([]);
-const selectedModule = ref(null);
-const selectedModuleIndex = ref(null);
+  const inputBox = ref("");
+  const outputBox = ref("");
 
-// Live Update
-let stopWatcher = null;
+  const showOutputBox = ref(true);
+  const fullScreenLevel = ref(0);
 
-watch(
-  () => liveUpdate.value,
-  enabled => {
-    // stop old watcher if exists
-    if (stopWatcher) {
-      stopWatcher();
-      stopWatcher = null;
-    }
+  const inputBoxLocked = ref(false);
 
-    // create new watcher if enabled
-    if (enabled) {
-      stopWatcher = watch([inputBox, recepiePipeline], compilePipeline, {
-        deep: true
-      });
-    }
-  },
-  { immediate: true }
-);
+  const recepiePipeline = ref([]);
+  const selectedModule = ref(null);
+  const selectedModuleIndex = ref(null);
 
-function showRecepieOptions(m) {
-  const idx = recepiePipeline.value.indexOf(m);
-  selectedModuleIndex.value = idx;
-  selectedModule.value = recepiePipeline.value[idx];
-}
+  // Live Update
+  let stopWatcher = null;
 
-function groupModulesByCategory(modsObj) {
-  const groups = {};
+  watch(
+    () => liveUpdate.value,
+    enabled => {
+      // stop old watcher if exists
+      if (stopWatcher) {
+        stopWatcher();
+        stopWatcher = null;
+      }
 
-  for (const id in modsObj) {
-    const mod = modsObj[id];
-    if (!groups[mod.category]) {
-      groups[mod.category] = [];
-    }
-    groups[mod.category].push(mod);
+      // create new watcher if enabled
+      if (enabled) {
+        stopWatcher = watch([inputBox, recepiePipeline], compilePipeline, {
+          deep: true
+        });
+      }
+    },
+    { immediate: true }
+  );
+
+  function onToggleFullScreen() {
+    const LAST = showOutputBox.value && outputBox.value.length > 0 ? 3 : 2;
+
+    if (fullScreenLevel.value >= LAST) fullScreenLevel.value = 0;
+    else fullScreenLevel.value += 1;
   }
 
-  return groups;
-}
-
-// clone module object
-function cloneModule(m) {
-  const clone = { ...m }; // keeps run()
-
-  clone.options = {};
-
-  for (const key in m.options) {
-    const opt = m.options[key];
-
-    clone.options[key] = {
-      ...opt,
-      value: opt.default ?? ""
-    };
+  function showRecepieOptions(m) {
+    const idx = recepiePipeline.value.indexOf(m);
+    selectedModuleIndex.value = idx;
+    selectedModule.value = recepiePipeline.value[idx];
   }
 
-  return clone;
-}
+  function groupModulesByCategory(modsObj) {
+    const groups = {};
 
-// static grouped
-const grouped = groupModulesByCategory(modules);
-
-function selectModule(m) {
-  recepiePipeline.value.push(cloneModule(m));
-}
-
-// clear pipeline
-function clearPipeline() {
-  recepiePipeline.value.length = 0;
-  selectModule.value = null;
-}
-// clear both text boxea
-function clearTextBoxes() {
-  inputBox.value = "";
-  outputBox.value = "";
-}
-// copy output box text
-function copyOutputBox() {
-  navigator.clipboard.writeText(outputBox.value);
-}
-// swap both input boxes
-function swapTextBox() {
-  [inputBox.value, outputBox.value] = [outputBox.value, inputBox.value];
-}
-
-function toggleLiveUpdate() {
-  liveUpdate.value = !liveUpdate.value;
-  compilePipeline();
-}
-
-// Start Compile pipeline and display in output box
-function compilePipeline() {
-  let result = Promise.resolve(inputBox.value);
-
-  for (const mod of recepiePipeline.value) {
-    const options = {};
-
-    for (const key in mod.options) {
-      options[key] = mod.options[key].value;
+    for (const id in modsObj) {
+      const mod = modsObj[id];
+      if (!groups[mod.category]) {
+        groups[mod.category] = [];
+      }
+      groups[mod.category].push(mod);
     }
 
-    // chain sync or async module
-    result = result
-      .then(r => mod.run(r, options)) // handles sync + async safely
-      .catch(err => {
-        return "Error in module " + mod.name + ": " + err;
-      });
+    return groups;
   }
 
-  // output
-  result.then(final => {
-    outputBox.value = final;
-  });
-}
+  // clone module object
+  function cloneModule(m) {
+    const clone = { ...m }; // keeps run()
+
+    clone.options = {};
+
+    for (const key in m.options) {
+      const opt = m.options[key];
+
+      clone.options[key] = {
+        ...opt,
+        value: opt.default ?? ""
+      };
+    }
+
+    return clone;
+  }
+
+  // static grouped
+  const grouped = groupModulesByCategory(modules);
+
+  function selectModule(m) {
+    recepiePipeline.value.push(cloneModule(m));
+  }
+
+  // clear pipeline
+  function clearPipeline() {
+    recepiePipeline.value.length = 0;
+    selectModule.value = null;
+  }
+  // clear both text boxea
+  function clearTextBoxes() {
+    inputBox.value = "";
+    outputBox.value = "";
+  }
+  // copy output box text
+  function copyOutputBox() {
+    navigator.clipboard.writeText(outputBox.value);
+  }
+  // swap both input boxes
+  function swapTextBox() {
+    [inputBox.value, outputBox.value] = [outputBox.value, inputBox.value];
+  }
+
+  function toggleLiveUpdate() {
+    liveUpdate.value = !liveUpdate.value;
+    compilePipeline();
+  }
+
+  // Start Compile pipeline and display in output box
+  function compilePipeline() {
+    let result = Promise.resolve(inputBox.value);
+
+    for (const mod of recepiePipeline.value) {
+      const options = {};
+
+      for (const key in mod.options) {
+        options[key] = mod.options[key].value;
+      }
+
+      // chain sync or async module
+      result = result
+        .then(r => mod.run(r, options)) // handles sync + async safely
+        .catch(err => {
+          return "Error in module " + mod.name + ": " + err;
+        });
+    }
+
+    // output
+    result.then(final => {
+      outputBox.value = final;
+    });
+  }
 </script>
 
 <template>
-  <div id="main" data-theme="light" class="h-dvh flex flex-col overflow-hidden">
+  <div
+    id="main"
+    data-theme="light"
+    class="h-dvh flex flex-col overflow-hidden font-body"
+  >
     <!-- Header -->
     <div
-      class="relative bg-primary/20 text-primary p-2 py-3 flex justify-between items-center shadow-lg"
+      v-show="fullScreenLevel < 1"
+      class="relative bg-primary glass text-primary-content p-2 py-3 flex justify-between items-center shadow-lg font-heading"
     >
-      <button @click="showSideBar = true" class="flex items-center gap-1 hover:cursor-pointer">
+      <button @click="showSideBar = true" class="flex items-center gap-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -193,24 +213,40 @@ function compilePipeline() {
         </svg>
         <h1 class="font-bold">{{ $t("app.title") }}</h1>
       </button>
+
       <div class="flex gap-1 items-center">
+        <!-- Browser fullscreen -->
+        <button @click="toggleFullScreen" class="flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M21 3v6h-2V6.41l-3.29 3.3l-1.42-1.42L17.59 5H15V3zM3 3v6h2V6.41l3.29 3.3l1.42-1.42L6.41 5H9V3zm18 18v-6h-2v2.59l-3.29-3.29l-1.41 1.41L17.59 19H15v2zM9 21v-2H6.41l3.29-3.29l-1.41-1.42L5 17.59V15H3v6z"
+            />
+          </svg>
+        </button>
+        <!-- Theme -->
         <button
           class="flex items-center gap-1 hover:cursor-pointer"
           @click="showThemeSwitcher = !showThemeSwitcher"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="28"
-            height="28"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
           >
             <path
               fill="currentColor"
-              d="m3.975 19.8l-.85-.35q-.775-.325-1.037-1.125t.087-1.575l1.8-3.9zm4 2.2q-.825 0-1.412-.587T5.975 20v-6l2.65 7.35q.075.175.15.338t.2.312zm5.15-.1q-.8.3-1.55-.075t-1.05-1.175l-4.45-12.2q-.3-.8.05-1.562t1.15-1.038l7.55-2.75q.8-.3 1.55.075t1.05 1.175l4.45 12.2q.3.8-.05 1.563t-1.15 1.037zM10.975 10q.425 0 .713-.288T11.975 9t-.287-.712T10.975 8t-.712.288T9.975 9t.288.713t.712.287m1.45 10l7.55-2.75L15.525 5l-7.55 2.75zM7.975 7.75L15.525 5z"
+              d="M12 22A10 10 0 0 1 2 12A10 10 0 0 1 12 2c5.5 0 10 4 10 9a6 6 0 0 1-6 6h-1.8c-.3 0-.5.2-.5.5c0 .1.1.2.1.3c.4.5.6 1.1.6 1.7c.1 1.4-1 2.5-2.4 2.5m0-18a8 8 0 0 0-8 8a8 8 0 0 0 8 8c.3 0 .5-.2.5-.5c0-.2-.1-.3-.1-.4c-.4-.5-.6-1-.6-1.6c0-1.4 1.1-2.5 2.5-2.5H16a4 4 0 0 0 4-4c0-3.9-3.6-7-8-7m-5.5 6c.8 0 1.5.7 1.5 1.5S7.3 13 6.5 13S5 12.3 5 11.5S5.7 10 6.5 10m3-4c.8 0 1.5.7 1.5 1.5S10.3 9 9.5 9S8 8.3 8 7.5S8.7 6 9.5 6m5 0c.8 0 1.5.7 1.5 1.5S15.3 9 14.5 9S13 8.3 13 7.5S13.7 6 14.5 6m3 4c.8 0 1.5.7 1.5 1.5s-.7 1.5-1.5 1.5s-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5"
             />
           </svg>
 
-          <span class="hidden sm:block">{{ $t("btn.theme") }}</span>
+          <span class="sm:block">{{ $t("btn.theme") }}</span>
         </button>
       </div>
 
@@ -218,7 +254,7 @@ function compilePipeline() {
       <Transition name="slide-left">
         <div
           v-show="showThemeSwitcher"
-          class="absolute top-13 right-0 w-3/4 sm:w-1/3 max-h-[50svh] overflow-y-auto"
+          class="absolute top-13 right-0 w-3/4 sm:w-2/3 max-h-[400px] overflow-y-auto"
         >
           <ThemeSwitcher />
         </div>
@@ -227,29 +263,126 @@ function compilePipeline() {
 
     <!-- Main Layout -->
     <div class="flex-1 flex flex-col">
-      <div class="p-1 py-2">
+      <!-- InputBox Top Utils-->
+      <div
+        class="p-1 py-2 flex items-center gap-1 overflow-x-auto scrollbar-hide"
+      >
+        <div class="flex items-center gap-2 px-1">
+          <!-- Fullscreen Button -->
+          <button @click="onToggleFullScreen" class="active:scale-105">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                fill-rule="evenodd"
+                d="M18.29 2.89c-1.028-.138-2.383-.14-4.29-.14a.75.75 0 0 1 0-1.5h.056c1.838 0 3.294 0 4.433.153c1.172.158 2.121.49 2.87 1.238c.748.749 1.08 1.698 1.238 2.87c.153 1.14.153 2.595.153 4.433V10a.75.75 0 0 1-1.5 0c0-1.907-.002-3.261-.14-4.29c-.135-1.005-.389-1.585-.812-2.008s-1.003-.677-2.009-.812M2 13.25a.75.75 0 0 1 .75.75c0 1.907.002 3.262.14 4.29c.135 1.005.389 1.585.812 2.008s1.003.677 2.009.812c1.028.138 2.382.14 4.289.14a.75.75 0 0 1 0 1.5h-.056c-1.838 0-3.294 0-4.433-.153c-1.172-.158-2.121-.49-2.87-1.238c-.748-.749-1.08-1.698-1.238-2.87c-.153-1.14-.153-2.595-.153-4.433V14a.75.75 0 0 1 .75-.75"
+                clip-rule="evenodd"
+              />
+              <path
+                fill="currentColor"
+                d="M9.944 1.25H10a.75.75 0 0 1 0 1.5c-1.907 0-3.261.002-4.29.14c-1.005.135-1.585.389-2.008.812S3.025 4.705 2.89 5.71c-.138 1.029-.14 2.383-.14 4.29a.75.75 0 0 1-1.5 0v-.056c0-1.838 0-3.294.153-4.433c.158-1.172.49-2.121 1.238-2.87c.749-.748 1.698-1.08 2.87-1.238c1.14-.153 2.595-.153 4.433-.153M22 13.25a.75.75 0 0 1 .75.75v.056c0 1.838 0 3.294-.153 4.433c-.158 1.172-.49 2.121-1.238 2.87c-.749.748-1.698 1.08-2.87 1.238c-1.14.153-2.595.153-4.433.153H14a.75.75 0 0 1 0-1.5c1.907 0 3.262-.002 4.29-.14c1.005-.135 1.585-.389 2.008-.812s.677-1.003.812-2.009c.138-1.027.14-2.382.14-4.289a.75.75 0 0 1 .75-.75"
+                opacity="0.5"
+              />
+            </svg>
+          </button>
+          <!-- Lock Button -->
+          <button
+            @click="inputBoxLocked = !inputBoxLocked"
+            class="active:scale-105"
+          >
+            <svg
+              v-if="inputBoxLocked"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-width="1.5"
+                d="M6 10V8q0-.511.083-1M18 10V8A6 6 0 0 0 7.5 4.031M11 22H8c-2.828 0-4.243 0-5.121-.879C2 20.243 2 18.828 2 16s0-4.243.879-5.121C3.757 10 5.172 10 8 10h8c2.828 0 4.243 0 5.121.879C22 11.757 22 13.172 22 16s0 4.243-.879 5.121C20.243 22 18.828 22 16 22h-1"
+              />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <g fill="none">
+                <path
+                  fill="currentColor"
+                  d="M4.565 12.407a.75.75 0 1 0-1.13.986zM7.143 16.5l-.565.493a.75.75 0 0 0 1.13 0zm8.422-8.507a.75.75 0 1 0-1.13-.986zm-5.059 3.514a.75.75 0 0 0 1.13.986zm-.834 3.236a.75.75 0 1 0-1.13-.986zm-6.237-1.35l3.143 3.6l1.13-.986l-3.143-3.6zm4.273 3.6l1.964-2.25l-1.13-.986l-1.964 2.25zm3.928-4.5l1.965-2.25l-1.13-.986l-1.965 2.25zm1.965-2.25l1.964-2.25l-1.13-.986l-1.964 2.25z"
+                />
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="m20 7.563l-4.286 4.5M11 16l.429.563l2.143-2.25"
+                />
+              </g>
+            </svg>
+          </button>
+        </div>
         <TextAreaUtils v-model:text="inputBox" />
       </div>
-      <!-- Input -->
-      <div class="flex-1 flex flex-col">
-        <textarea
-          id="textarea-ref"
-          v-model="inputBox"
-          spellcheck="off"
-          autocorrect="off"
-          autocapitalize="off"
-          autocomplete="off"
-          inputmode="text"
-          class="flex-1 resize-none px-1 bg-base-100/20 text-base-content/60 focus:outline-none"
-        ></textarea>
-        <!-- Quick Insight -->
-        <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
-          <Insight :text="inputBox" showLines showBytes />
+      <!-- Input Box & Output Box -->
+      <div class="flex-1 flex flex-col md:flex-row">
+        <!-- Input -->
+        <div v-if="fullScreenLevel < 3" class="flex-1 flex flex-col">
+          <textarea
+            id="textarea-ref"
+            placeholder="Input Text Here..."
+            v-model="inputBox"
+            spellcheck="off"
+            autocorrect="off"
+            autocapitalize="off"
+            autocomplete="off"
+            :readonly="inputBoxLocked"
+            inputmode="text"
+            class="flex-1 resize-none px-1 bg-base-100/20 text-base-content/60 focus:outline-none placeholder:opacity-80"
+          ></textarea>
+          <!-- Quick Insight -->
+          <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
+            <Insight :text="inputBox" showLines showBytes />
+          </div>
+        </div>
+
+        <div class="divider divider-horizontal m-0"></div>
+
+        <!-- Output -->
+        <div
+          v-if="showOutputBox && inputBox.length > 0"
+          class="flex-1 bg-base-100 flex flex-col"
+        >
+          <textarea
+            v-model="outputBox"
+            @dblclick="copyOutputBox"
+            readonly
+            spellcheck="false"
+            autocorrect="off"
+            autocapitalize="off"
+            class="w-full h-full resize-none p-1 bg-base-100/10 focus:outline-none text-base-content/60"
+          ></textarea>
+          <!-- output quick insight -->
+          <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
+            <Insight :text="outputBox" showLines showBytes />
+          </div>
         </div>
       </div>
-
-      <!-- Middle Bar -->
-      <div class="min-h-18 flex border-b border-primary/60">
+      <!-- Bottom Main Bar -->
+      <div
+        v-show="fullScreenLevel < 2"
+        class="min-h-18 flex border-b border-primary/60 font-heading"
+      >
         <!-- left part -->
         <div class="flex flex-col h-full min-w-10 sm:min-w-32">
           <!-- live update button -->
@@ -308,6 +441,42 @@ function compilePipeline() {
             <div class="flex-1">
               <Emoticon />
             </div>
+
+            <!-- Toggle Output Box Button -->
+            <button
+              @click="showOutputBox = !showOutputBox"
+              class="h-full px-2 bg-secondary/60 flex items-center gap-1"
+            >
+              <svg
+                v-if="showOutputBox"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 21 21"
+              >
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M5.5 3.5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2m1 2h8"
+                  stroke-width="1"
+                />
+              </svg>
+              <svg
+                v-else
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M21.707 9.777V8.313H2.428v1.334L2 9.644v.834l2.052 5.209h16.392L22 10.433v-.654Zm-2.368 5.481H5.044S3.714 11 3.623 10.929h16.889z"
+                />
+              </svg>
+              <span class="hidden sm:block">{{ $t("btn.output") }}</span>
+            </button>
 
             <div class="h-full flex items-center">
               <!-- swap button -->
@@ -475,15 +644,15 @@ function compilePipeline() {
             <div
               class="flex-1 py-1 pr-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth whitespace-nowrap select-none flex-shrink-0"
             >
-              <!-- middle modules list -->
+              <!-- middle modules / recepies list -->
               <div
                 v-for="(m, index) in recepiePipeline"
                 @click="showRecepieOptions(m)"
-                class="px-2 rstyle text-xs p-0.5 flex items-center justify-center border shadow-lg hover:cursor-pointer"
+                class="px-2 glass rounded text-xs p-0.5 flex items-center justify-center border shadow-lg hover:cursor-pointer py-1"
                 :class="
                   index % 2 === 0
-                    ? 'bg-success/70 text-success-content/80 border-success-content/30'
-                    : 'bg-warning/70 text-warning-content/80 border-warning-content/30'
+                    ? 'bg-primary text-primary-content'
+                    : 'bg-secondary text-secondary-content'
                 "
               >
                 {{ m.name }}
@@ -492,27 +661,23 @@ function compilePipeline() {
           </div>
         </div>
       </div>
-
-      <!-- Output -->
-
-      <div class="flex-1 bg-base-100 flex flex-col">
-        <textarea
-          v-model="outputBox"
-          @dblclick="copyOutputBox"
-          readonly
-          spellcheck="false"
-          autocorrect="off"
-          autocapitalize="off"
-          class="w-full h-full resize-none p-1 bg-base-100/10 focus:outline-none text-base-content/60"
-        ></textarea>
-        <!-- output quick insight -->
-        <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
-          <Insight :text="outputBox" showLines showBytes />
-        </div>
-      </div>
+    </div>
+    <!-- kittychef quick insight -->
+    <div
+      v-if="fullScreenLevel < 2"
+      class="p-1 px-2 bg-primary/60 flex gap-2 text-xs text-base-content/70 font-heading"
+    >
+      <span class="px-2 py-0.5 rounded bg-primary/60 text-primary-content">
+        {{ $t("insight.live") }}
+        <strong class="ml-1">{{ liveUpdate ? "Yes" : "No" }}</strong>
+      </span>
+      <span class="px-2 py-0.5 rounded bg-primary/60 text-primary-content">
+        {{ $t("insight.recepies") }}
+        <strong class="ml-1">{{ recepiePipeline.length }}</strong>
+      </span>
     </div>
 
-    <!-- Recepie Options -->
+    <!-- Recepie Options overlay fixed -->
     <Transition name="fade-scale">
       <div
         v-if="selectedModule"
@@ -568,122 +733,3 @@ function compilePipeline() {
     </Transition>
   </div>
 </template>
-
-<style>
-.rstyle {
-  border-radius: 0.5rem;
-  border-top-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-/* Hide scrollbar for Chrome, Safari and Opera */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-
-.fade-scale-enter-active,
-.fade-scale-leave-active {
-  transition: all 0.2s ease;
-}
-
-.fade-scale-enter-from {
-  opacity: 0;
-  transform: scale(0.95);
-}
-
-.fade-scale-enter-to {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.fade-scale-leave-from {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.fade-scale-leave-to {
-  opacity: 0;
-  transform: scale(0.9);
-}
-
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: all 0.25s ease;
-}
-
-.slide-up-enter-from {
-  opacity: 0;
-  transform: translateY(40px);
-}
-
-.slide-up-enter-to {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.slide-up-leave-from {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.slide-up-leave-to {
-  opacity: 0;
-  transform: translateY(40px);
-}
-
-.slide-right-enter-active,
-.slide-right-leave-active {
-  transition: all 0.25s ease;
-}
-
-.slide-right-enter-from {
-  opacity: 0;
-  transform: translateX(-40px);
-}
-
-.slide-right-enter-to {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.slide-right-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.slide-right-leave-to {
-  opacity: 0;
-  transform: translateX(-40px);
-}
-
-.slide-left-enter-active,
-.slide-left-leave-active {
-  transition: all 0.25s ease;
-}
-
-.slide-left-enter-from {
-  opacity: 0;
-  transform: translateX(40px);
-}
-
-.slide-left-enter-to {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.slide-left-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.slide-left-leave-to {
-  opacity: 0;
-  transform: translateX(40px);
-}
-</style>
