@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, watch, nextTick } from "vue";
+  import { ref, watch } from "vue";
   import { toggleFullScreen } from "./utils";
 
   import Insight from "@/components/Insight.vue";
@@ -35,8 +35,6 @@
   const selectedModule = ref(null);
   const selectedModuleIndex = ref(null);
 
-  const modulesChipsRef = ref(null);
-
   // Live Update
   let stopWatcher = null;
 
@@ -59,24 +57,8 @@
     { immediate: true }
   );
 
-  const scrollModuleChipsboxToRight = () => {
-    if (modulesChipsRef.value) {
-      modulesChipsRef.value.scrollTo({
-        left: modulesChipsRef.value.scrollWidth,
-        behavior: "smooth"
-      });
-    }
-  };
-
-  const canShowOutputBox = () => {
-    return (
-      showOutputBox.value &&
-      (inputBox.value.length > 0 || recepiePipeline.value.length > 0)
-    );
-  };
-
   function onToggleFullScreen() {
-    const LAST = canShowOutputBox() ? 3 : 2;
+    const LAST = showOutputBox.value && outputBox.value.length > 0 ? 3 : 2;
 
     if (fullScreenLevel.value >= LAST) fullScreenLevel.value = 0;
     else fullScreenLevel.value += 1;
@@ -125,10 +107,6 @@
 
   function selectModule(m) {
     recepiePipeline.value.push(cloneModule(m));
-
-    nextTick(() => {
-      scrollModuleChipsboxToRight();
-    });
   }
 
   // clear pipeline
@@ -276,7 +254,7 @@
       <Transition name="slide-left">
         <div
           v-show="showThemeSwitcher"
-          class="absolute top-12 right-0 w-3/4 sm:w-2/3 max-h-[400px] overflow-y-auto"
+          class="absolute top-13 right-0 w-3/4 sm:w-2/3 max-h-[400px] overflow-y-auto"
         >
           <ThemeSwitcher />
         </div>
@@ -381,7 +359,10 @@
         <div class="divider divider-horizontal m-0"></div>
 
         <!-- Output -->
-        <div v-if="canShowOutputBox()" class="flex-1 bg-base-100 flex flex-col">
+        <div
+          v-if="showOutputBox && inputBox.length > 0"
+          class="flex-1 bg-base-100 flex flex-col"
+        >
           <textarea
             v-model="outputBox"
             @dblclick="copyOutputBox"
@@ -389,8 +370,7 @@
             spellcheck="false"
             autocorrect="off"
             autocapitalize="off"
-            placeholder="Output ..."
-            class="w-full h-full resize-none p-1 bg-base-100/10 focus:outline-none text-base-content/60 placeholder:opacity-80"
+            class="w-full h-full resize-none p-1 bg-base-100/10 focus:outline-none text-base-content/60"
           ></textarea>
           <!-- output quick insight -->
           <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
@@ -662,7 +642,6 @@
             </button>
             <!-- Module chips -->
             <div
-              ref="modulesChipsRef"
               class="flex-1 py-1 pr-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth whitespace-nowrap select-none flex-shrink-0"
             >
               <!-- middle modules / recepies list -->
@@ -702,35 +681,15 @@
     <Transition name="fade-scale">
       <div
         v-if="selectedModule"
-        class="fixed top-0 left-0 w-full h-full flex flex-col items-center px-8 justify-center bg-black/60"
-        @click.self="selectedModule = null"
+        class="fixed top-0 left-0 w-full h-full flex flex-col items-center px-8 justify-center bg-base-100/80"
+        @click="selectedModule = null"
       >
         <div
-          class="w-full h-[25rem] sm:h-[50%] sm:w-[50%] rstyle bg-base-100 shadow-lg flex flex-col overflow-hidden"
+          @click.stop
+          class="w-full min-h-[25rem] sm:min-h-[50%] sm:w-[50%] bg-base-100 border rstyle border-base-content/60 overflow-y-auto"
         >
-          <!-- HEAD -->
-          <div
-            class="flex items-center justify-between p-2 py-3 bg-primary text-primary-content glass"
-          >
-            <h1 class="font-bold text-lg">{{ selectedModule.name }} Options</h1>
+          <h3  class="font-bold text-lg mb-2">{{ selectedModule.name }} Options</h3>
 
-            <!-- close btn -->
-            <button @click="selectedModule = null" class="opacity-80">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Options -->
           <RecepieOptions
             :module="selectedModule"
             @update="

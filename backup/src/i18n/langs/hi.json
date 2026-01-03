@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "किट्टीशेफ"
+  },
+  "btn": {
+    "theme": "थीम",
+    "live": "लाइव",
+    "add": "जोड़ें",
+    "recepies": "रेसिपीज़",
+    "swap": "स्वैप",
+    "copy": "कॉपी",
+    "clear": "क्लियर",
+    "reset": "रीसेट",
+    "cook": "कुक",
+    "output": "आउटपुट"
+  },
+  "insight": {
+    "chars": "अक्षर",
+    "words": "शब्द",
+    "lines": "पंक्तियाँ",
+    "bytes": "बाइट्स",
+    "live": "लाइव",
+    "recepies": "रेसिपी"
+  },
+  "sidebar": {
+    "language": "भाषा"
+  },
+  "headings": {
+    "select_a_recepie": "एक रेसिपी चुनें",
+    "recepies": "रेसिपी"
+  },
+  "text_utils": {
+    "import": "आयात",
+    "copy": "कॉपी",
+    "paste": "पेस्ट",
+    "clear": "साफ करें",
+    "select": "चुनें",
+    "upper": "बड़े अक्षर",
+    "lower": "छोटे अक्षर",
+    "reverse": "उल्टा करें",
+    "trim": "ट्रिम करें",
+    "no_space": "स्पेस हटाएँ",
+    "no_blank_lines": "खाली लाइन हटाएँ",
+    "swap_case": "केस बदलें",
+    "timestamp": "टाइमस्टैम्प"
+  }
+}

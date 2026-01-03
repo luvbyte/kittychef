@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "KittyChef"
+  },
+  "btn": {
+    "theme": "Theme",
+    "live": "Live",
+    "add": "Add",
+    "recepies": "Recepies",
+    "swap": "Swap",
+    "copy": "Copy",
+    "clear": "Clear",
+    "reset": "Reset",
+    "cook": "Cook",
+    "output": "Output"
+  },
+  "insight": {
+    "chars": "Chars",
+    "words": "Words",
+    "lines": "Lines",
+    "bytes": "Bytes",
+    "live": "Live",
+    "recepies": "Recepies"
+  },
+  "sidebar": {
+    "language": "Language"
+  },
+  "headings": {
+    "select_a_recepie": "Select a Recepie",
+    "recepies": "Recepies"
+  },
+  "text_utils": {
+    "import": "Import",
+    "copy": "Copy",
+    "paste": "Paste",
+    "clear": "Clear",
+    "select": "Select",
+    "upper": "Upper",
+    "lower": "Lower",
+    "reverse": "Reverse",
+    "trim": "Trim",
+    "no_space": "NoSpace",
+    "no_blank_lines": "NoBlankLines",
+    "swap_case": "SwapCase",
+    "timestamp": "Timestamp"
+  }
+}

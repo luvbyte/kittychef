@@ -1,44 +1,44 @@
 <script setup lang="ts">
-  import { ref, computed } from "vue";
+import { ref, computed } from "vue";
 
-  const props = defineProps(["grouped", "close"]);
-  const emit = defineEmits(["select"]);
+const props = defineProps(["grouped", "close"]);
+const emit = defineEmits(["select"]);
 
-  const search = ref("");
+const search = ref("");
 
-  const filteredGroups = computed(() => {
-    const term = search.value.trim().toLowerCase();
-    if (!term) return props.grouped;
+const filteredGroups = computed(() => {
+  const term = search.value.trim().toLowerCase();
+  if (!term) return props.grouped;
 
-    const result = {};
-    for (const [category, mods] of Object.entries(props.grouped)) {
-      const filtered = mods.filter(m => m.name.toLowerCase().includes(term));
-      if (filtered.length > 0) {
-        result[category] = filtered;
-      }
+  const result = {};
+  for (const [category, mods] of Object.entries(props.grouped)) {
+    const filtered = mods.filter(m => m.name.toLowerCase().includes(term));
+    if (filtered.length > 0) {
+      result[category] = filtered;
     }
-    return result;
-  });
-
-  // UI Accordian
-  const openCategory = ref<string | null>(null);
-
-  function toggle(category: string) {
-    // When searching, ignore manual toggling
-    if (search.value.trim()) return;
-    openCategory.value = openCategory.value === category ? null : category;
   }
+  return result;
+});
 
-  // Expansion
-  const isOpen = (category: string) => {
-    if (search.value.trim()) return true; // Auto-expand all during search
-    return openCategory.value === category;
-  };
+// UI Accordian
+const openCategory = ref<string | null>(null);
 
-  function selectModule(m) {
-    emit("select", m);
-    props.close();
-  }
+function toggle(category: string) {
+  // When searching, ignore manual toggling
+  if (search.value.trim()) return;
+  openCategory.value = openCategory.value === category ? null : category;
+}
+
+// Expansion
+const isOpen = (category: string) => {
+  if (search.value.trim()) return true; // Auto-expand all during search
+  return openCategory.value === category;
+};
+
+function selectModule(m) {
+  emit("select", m);
+  props.close();
+}
 </script>
 
 <template>
@@ -73,19 +73,23 @@
         <div class="font-bold pt-1">{{ $t("headings.select_a_recepie") }}</div>
       </div>
       <!-- Close Button -->
-      <button @click="props.close">
+      <div @click="props.close" class="pt-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
           height="24"
-          viewBox="0 0 24 24"
+          viewBox="0 0 32 32"
         >
           <path
             fill="currentColor"
-            d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"
+            d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
+          />
+          <path
+            fill="currentColor"
+            d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
           />
         </svg>
-      </button>
+      </div>
     </div>
 
     <!-- Search -->
@@ -103,7 +107,7 @@
         <div v-for="(mods, category, index) in filteredGroups" :key="category">
           <!-- Category Header -->
           <button
-            class="w-full flex justify-between items-center p-2 text-sm font-medium text-base-content font-heading"
+            class="w-full flex justify-between items-center p-2 text-sm font-medium text-base-content"
             :class="index % 2 === 0 ? 'bg-base-200' : 'bg-base-300'"
             @click="toggle(category)"
           >
@@ -134,13 +138,11 @@
             class="overflow-y-auto transition-[max-height] duration-300 px-2"
             :class="isOpen(category) ? 'max-h-96' : 'max-h-0'"
           >
-            <div
-              class="flex flex-col my-2 gap-1 sm:grid sm:grid-cols-2 md:grid-cols-3"
-            >
+            <div class="flex flex-col gap-1 mt-1 mb-1 sm:grid sm:grid-cols-2 md:grid-cols-3">
               <button
                 v-for="m in mods"
                 :key="m.id"
-                class="text-left text-xs p-2 rounded-md bg-primary text-primary-content glass font-semibold"
+                class="text-left text-xs p-2 rounded-md bg-primary/80 text-primary-content"
                 @click="selectModule(m)"
               >
                 {{ m.name }}

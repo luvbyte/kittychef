@@ -1,16 +1,23 @@
 <script setup lang="ts">
   const props = defineProps<{
-    module: any;
+    module: Object;
   }>();
 
   const emit = defineEmits(["update"]);
 </script>
 
 <template>
-  <div class="p-2 w-full flex flex-col gap-2 overflow-y-auto">
-    <div v-for="(opt, key) in module.options" :key="key" class="flex flex-col">
-      <!-- label -->
-      <div v-if="opt.type !== 'checkbox'">{{ opt.label }}</div>
+  <div class="p-4 w-full">
+    <div
+      v-for="(opt, key) in module.options"
+      :key="key"
+      class="flex gap-1 flex-col"
+    >
+      <!--
+      <label class="text-sm font-medium">{{ opt.label }}</label>
+    -->
+      <div class="divider m-0">{{ opt.label }}</div>
+
       <!-- TEXT -->
       <input
         v-if="opt.type === 'text'"
@@ -48,7 +55,7 @@
       >
         <input
           type="checkbox"
-          class="checkbox checkbox-secondary"
+          class="checkbox checkbox-primary"
           :checked="opt.value"
           @change="e => emit('update', { key, value: e.target.checked })"
         />

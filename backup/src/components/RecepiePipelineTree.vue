@@ -1,144 +1,121 @@
 <script setup lang="ts">
-  import { ref } from "vue";
-  import { modules } from "@/modules";
+import { ref } from "vue";
 
-  import RecepieOptions from "@/components/RecepieOptions.vue";
+import { modules } from "@/modules";
 
-  const props = defineProps<{
-    recepiePipeline: any[];
-    clearPipeline: () => void;
-    addRecepie: () => void;
-    close: () => void;
-  }>();
+const props = defineProps<{
+  recepiePipeline: any[];
+  clearPipeline: () => void;
+  addRecepie: () => void;
+  close: () => void;
+}>();
 
-  const collapsedPipelines = ref([]);
+const openIndex = ref<number | null>(null);
 
-  function toggleOptions(mod: any) {
-    // if module has no options
-    if (Object.keys(mod.options).length <= 0) return;
+function toggle(i: number) {
+  openIndex.value = openIndex.value === i ? null : i;
+}
 
-    const index = collapsedPipelines.value.indexOf(mod.id);
-    // if not exists
-    if (index === -1) {
-      collapsedPipelines.value.push(mod.id);
-    } else {
-      collapsedPipelines.value.splice(index, 1);
+function moveUp(i: number) {
+  if (i === 0) return;
+  const arr = props.recepiePipeline;
+  [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
+}
+
+function moveDown(i: number) {
+  const arr = props.recepiePipeline;
+  if (i >= arr.length - 1) return;
+  [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+}
+
+function removeItem(i: number) {
+  props.recepiePipeline.splice(i, 1);
+}
+
+// EXPORT  (ONLY IDs + option values)
+function exportPipeline() {
+  const clean = props.recepiePipeline.map(mod => {
+    const opts = {};
+    for (const key in mod.options) {
+      opts[key] = mod.options[key].value;
     }
-  }
-
-  // Clear
-  function clear() {
-    props.clearPipeline();
-    collapsedPipelines.value = [];
-  }
-
-  function moveUp(i: number) {
-    if (i === 0) return;
-    const arr = props.recepiePipeline;
-    [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
-  }
-
-  function moveDown(i: number) {
-    const arr = props.recepiePipeline;
-    if (i >= arr.length - 1) return;
-    [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
-  }
-
-  function removeItem(i: number, mod) {
-    props.recepiePipeline.splice(i, 1);
-
-    const index = collapsedPipelines.value.indexOf(mod.id);
-    if (index !== -1) {
-      collapsedPipelines.value.splice(index, 1);
-    }
-  }
-
-  // EXPORT  (ONLY IDs + option values)
-  function exportPipeline() {
-    const clean = props.recepiePipeline.map(mod => {
-      const opts = {};
-      for (const key in mod.options) {
-        opts[key] = mod.options[key].value;
-      }
-      return {
-        id: mod.id,
-        options: opts
-      };
-    });
-
-    const data = JSON.stringify(clean, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "kittychef_pipeline.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  // IMPORT (REBUILD FROM modules OBJECT)
-  function importPipeline() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-
-    input.onchange = async e => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      try {
-        const text = await file.text();
-        const imported = JSON.parse(text);
-
-        if (!Array.isArray(imported)) {
-          alert("Invalid pipeline file");
-          return;
-        }
-
-        const rebuilt = imported
-          .map(item => {
-            const base = modules[item.id]; // lookup module
-            if (!base) return null;
-
-            // shallow clone module WITHOUT destroying run() function
-            const modClone = {
-              ...base,
-              options: {}
-            };
-
-            // options
-            for (const key in base.options) {
-              modClone.options[key] = {
-                ...base.options[key],
-                value: item.options?.[key] ?? base.options[key].default ?? ""
-              };
-            }
-
-            return modClone;
-          })
-          .filter(Boolean); // remove nulls
-
-        props.recepiePipeline.splice(
-          0,
-          props.recepiePipeline.length,
-          ...rebuilt
-        );
-
-        alert("Pipeline imported successfully!");
-      } catch (err) {
-        alert("Failed to import pipeline: " + err.message);
-      }
+    return {
+      id: mod.id,
+      options: opts
     };
+  });
 
-    input.click();
-  }
+  const data = JSON.stringify(clean, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "kittychef_pipeline.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// IMPORT (REBUILD FROM modules OBJECT)
+function importPipeline() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+
+  input.onchange = async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const imported = JSON.parse(text);
+
+      if (!Array.isArray(imported)) {
+        alert("Invalid pipeline file");
+        return;
+      }
+
+      const rebuilt = imported
+        .map(item => {
+          const base = modules[item.id]; // lookup module
+          if (!base) return null;
+
+          // shallow clone module WITHOUT destroying run() function
+          const modClone = {
+            ...base,
+            options: {}
+          };
+
+          // options
+          for (const key in base.options) {
+            modClone.options[key] = {
+              ...base.options[key],
+              value: item.options?.[key] ?? base.options[key].default ?? ""
+            };
+          }
+
+          return modClone;
+        })
+        .filter(Boolean); // remove nulls
+
+      props.recepiePipeline.splice(0, props.recepiePipeline.length, ...rebuilt);
+
+      alert("Pipeline imported successfully!");
+    } catch (err) {
+      alert("Failed to import pipeline: " + err.message);
+    }
+  };
+
+  input.click();
+}
 </script>
 
 <template>
   <div class="absolute h-screen w-screen flex flex-col bg-base-100 gap-2">
     <!-- Modal Header -->
-    <div class="p-2 flex justify-between items-center border-b border-base-300">
+    <div
+      class="p-2 flex justify-between items-center py-2 border-b border-base-300"
+    >
       <!-- Title -->
       <div class="flex items-center gap-2">
         <svg
@@ -163,11 +140,15 @@
           xmlns="http://www.w3.org/2000/svg"
           width="24"
           height="24"
-          viewBox="0 0 24 24"
+          viewBox="0 0 32 32"
         >
           <path
             fill="currentColor"
-            d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"
+            d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14s14-6.2 14-14S23.8 2 16 2m0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12s-5.4 12-12 12"
+          />
+          <path
+            fill="currentColor"
+            d="M21.4 23L16 17.6L10.6 23L9 21.4l5.4-5.4L9 10.6L10.6 9l5.4 5.4L21.4 9l1.6 1.6l-5.4 5.4l5.4 5.4z"
           />
         </svg>
       </div>
@@ -177,7 +158,7 @@
       <div class="flex gap-1 items-center">
         <!-- Clear -->
         <button
-          @click="clear"
+          @click="clearPipeline"
           class="px-3 py-1 bg-error/80 text-error-content rounded shadow-lg active:bg-error transition"
         >
           <svg
@@ -273,18 +254,20 @@
       <div
         v-for="(mod, i) in props.recepiePipeline"
         :key="mod.id + i"
-        @click="toggleOptions(mod)"
-        class="mb-2 p-1 rounded-xl bg-base-200 text-base-content shadow-sm"
+        class="mb-2 p-1 rounded-xl bg-base-300 shadow-sm"
       >
         <!-- Module Row -->
-        <div class="flex justify-between items-center px-2 py-1">
+        <div class="flex justify-between items-center">
           <div class="font-semibold text-sm truncate">
             {{ i + 1 }}. {{ mod.name }}
           </div>
 
-          <div @click.stop class="flex items-center gap-1">
-            <!-- Remove -->
-            <button class="btn btn-xs btn-error" @click="removeItem(i, mod)">
+          <div class="flex items-center gap-1">
+                       <!-- Remove -->
+            <button
+              class="bg-error text-error-content p-1 rounded px-2"
+              @click="removeItem(i)"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -308,10 +291,10 @@
                 </g>
               </svg>
             </button>
-
+           
             <!-- Move up -->
             <button
-              class="btn btn-xs btn-primary"
+              class="px-2 p-1 bg-primary text-primary-content rounded"
               @click="moveUp(i)"
               :disabled="i === 0"
             >
@@ -330,7 +313,7 @@
 
             <!-- Move down -->
             <button
-              class="btn btn-xs btn-secondary"
+              class="px-2 p-1 rounded bg-secondary text-secondary-content"
               @click="moveDown(i)"
               :disabled="i === props.recepiePipeline.length - 1"
             >
@@ -348,19 +331,15 @@
             </button>
 
             <!-- Expand -->
-            <button
-              @click="toggleOptions(mod)"
-              :disabled="Object.keys(mod.options).length <= 0"
-              class="disabled:opacity-40"
-            >
+            <button @click="toggle(i)" class="p-1 px-2 sm:px-4">
               <div
                 class="transition-transform duration-200"
-                :class="collapsedPipelines.includes(mod.id) ? 'rotate-90' : ''"
+                :class="openIndex === i ? 'rotate-90' : ''"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="28"
-                  height="28"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                 >
                   <path
@@ -376,14 +355,67 @@
         </div>
 
         <!-- Options panel -->
-        <Transition name="fade-scale">
-          <RecepieOptions
-            @click.stop
-            v-if="collapsedPipelines.includes(mod.id)"
-            :module="mod"
-            @update="data => (mod.options[data.key].value = data.value)"
-          />
-        </Transition>
+        <div
+          v-if="openIndex === i"
+          class="mt-2 p-2 bg-base-300 rounded-md text-xs flex flex-col gap-2"
+        >
+          <div v-if="Object.keys(mod.options).length === 0" class="opacity-60">
+            No options
+          </div>
+
+          <div
+            v-for="(opt, key) in mod.options"
+            :key="key"
+            class="flex gap-2 p-2 bg-base-200 rounded-md w-full"
+            :class="
+              opt.type != 'checkbox'
+                ? 'flex-col'
+                : 'flex-row flex-row-reverse justify-end'
+            "
+          >
+            <label class="text-xs font-medium">{{ opt.label || key }}</label>
+
+            <!-- TEXT -->
+            <input
+              v-if="opt.type === 'text'"
+              type="text"
+              class="input input-xs input-bordered w-full"
+              :placeholder="opt.placeholder"
+              :value="opt.value"
+              @input="e => (mod.options[key].value = e.target.value)"
+            />
+
+            <!-- SELECT -->
+            <select
+              v-if="opt.type === 'select'"
+              class="select select-xs select-bordered w-full"
+              :value="opt.value"
+              @change="e => (mod.options[key].value = e.target.value)"
+            >
+              <option v-for="c in opt.choices" :key="c" :value="c">
+                {{ c }}
+              </option>
+            </select>
+
+            <!-- NUMBER -->
+            <input
+              v-if="opt.type === 'number'"
+              type="number"
+              class="input input-xs input-bordered w-full"
+              :value="opt.value"
+              @input="e => (mod.options[key].value = Number(e.target.value))"
+            />
+
+            <!-- CHECKBOX -->
+            <input
+              v-if="opt.type === 'checkbox'"
+              type="checkbox"
+              class="checkbox checkbox-xs"
+              :checked="opt.value"
+              @change="e => (mod.options[key].value = e.target.checked)"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>

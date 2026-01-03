@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "KittyChef"
+  },
+  "btn": {
+    "theme": "主题",
+    "live": "实时",
+    "add": "添加",
+    "recepies": "配方",
+    "swap": "交换",
+    "copy": "复制",
+    "clear": "清除",
+    "reset": "重置",
+    "cook": "烹饪",
+    "output": "输出"
+  },
+  "insight": {
+    "chars": "字符",
+    "words": "词语",
+    "lines": "行",
+    "bytes": "字节",
+    "live": "实时",
+    "recepies": "食谱"
+  },
+  "sidebar": {
+    "language": "语言"
+  },
+  "headings": {
+    "select_a_recepie": "选择一个食谱",
+    "recepies": "食谱"
+  },
+  "text_utils": {
+    "import": "导入",
+    "copy": "复制",
+    "paste": "粘贴",
+    "clear": "清除",
+    "select": "选择",
+    "upper": "大写",
+    "lower": "小写",
+    "reverse": "反转",
+    "trim": "去空格",
+    "no_space": "无空格",
+    "no_blank_lines": "删除空行",
+    "swap_case": "切换大小写",
+    "timestamp": "时间戳"
+  }
+}
