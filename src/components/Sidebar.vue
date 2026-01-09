@@ -2,6 +2,20 @@
   import { usePWAInstall } from "@/composables/usePWAInstall";
 
   const { installPWA, isInstallable } = usePWAInstall();
+  
+  import Select from "@/components/ui/Select.vue"
+
+  const languages = [
+    { label: "🇬🇧 English", value: "en" },
+    { label: "🇮🇳 हिन्दी", value: "hi" },
+    { label: "🇮🇳 తెలుగు", value: "te" },
+    { label: "🇷🇺 Русский", value: "ru" },
+    { label: "🇦🇲 Հայերեն", value: "hy" },
+    { label: "🇪🇸 Español", value: "es" },
+    { label: "🇫🇷 Français", value: "fr" },
+    { label: "🇩🇪 Deutsch", value: "de" },
+    { label: "🇨🇳 中文", value: "zh" }
+  ];
 </script>
 
 <template>
@@ -192,11 +206,16 @@
       </div>
 
       <!-- Languages select box -->
-      <div class="flex flex-col rounded-lg p-2 gap-2">
+      <Select
+        v-model="$i18n.locale"
+        :options="languages"
+        :label="$t('sidebar.language')"
+      />
+      <div v-if="false" class="flex flex-col rounded-lg p-2 gap-2">
         <div class="text-base-content/60">{{ $t("sidebar.language") }}</div>
         <select
           v-model="$i18n.locale"
-          class="select outline-none select-sm bg-transparent"
+          class="select outline-none select-sm bg-transparent focus:bg-base-100"
         >
           <option value="en">🇬🇧 English</option>
           <option value="hi">🇮🇳 हिन्दी</option>

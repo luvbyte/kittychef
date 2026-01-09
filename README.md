@@ -96,10 +96,7 @@ Instant insights
 
 📸 Screenshots
 
-![Screenshot](docs/screenshots/ss-1.jpg)
-![Screenshot](docs/screenshots/ss-2.jpg)
-![Screenshot](docs/screenshots/ss-3.jpg)
-![Screenshot](docs/screenshots/ss-4.jpg)
+![Screenshot](docs/screenshots/ss.jpg)
 
 ---
 

@@ -33,7 +33,7 @@
       <!-- SELECT -->
       <select
         v-if="opt.type === 'select'"
-        class="select select-sm select-bordered w-full bg-transparent focus:outline-none"
+        class="select select-sm select-bordered w-full focus:outline-none"
         :value="opt.value"
         @change="e => emit('update', { key, value: e.target.value })"
       >
