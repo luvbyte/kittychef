@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { ref } from "vue";
-  import { modules } from "@/modules";
+  import modules from "@/core/modules";
 
   import RecepieOptions from "@/components/RecepieOptions.vue";
 
@@ -13,14 +13,17 @@
 
   const collapsedPipelines = ref([]);
 
-  function toggleOptions(mod: any) {
-    // if module has no options
-    if (Object.keys(mod.options).length <= 0) return;
+  function toggleOptions(mod: any, i) {
+    // skip if module has no options and no description
+    if (Object.keys(mod.options).length <= 0 && mod.description.length <= 0)
+      return;
 
-    const index = collapsedPipelines.value.indexOf(mod.id);
+    const key = mod.id + i;
+
+    const index = collapsedPipelines.value.indexOf(key);
     // if not exists
     if (index === -1) {
-      collapsedPipelines.value.push(mod.id);
+      collapsedPipelines.value.push(key);
     } else {
       collapsedPipelines.value.splice(index, 1);
     }
@@ -136,7 +139,7 @@
 </script>
 
 <template>
-  <div class="absolute h-screen w-screen flex flex-col bg-base-100 gap-2">
+  <div class="fixed full inset-0 flex flex-col bg-base-100 gap-2">
     <!-- Modal Header -->
     <div class="p-2 flex justify-between items-center border-b border-base-300">
       <!-- Title -->
@@ -273,7 +276,7 @@
       <div
         v-for="(mod, i) in props.recepiePipeline"
         :key="mod.id + i"
-        @click="toggleOptions(mod)"
+        @click="toggleOptions(mod, i)"
         class="mb-2 p-1 rounded-xl bg-base-200 text-base-content shadow-sm"
       >
         <!-- Module Row -->
@@ -348,14 +351,12 @@
             </button>
 
             <!-- Expand -->
-            <button
-              @click="toggleOptions(mod)"
-              :disabled="Object.keys(mod.options).length <= 0"
-              class="disabled:opacity-40"
-            >
+            <button @click="toggleOptions(mod, i)" class="disabled:opacity-40">
               <div
                 class="transition-transform duration-200"
-                :class="collapsedPipelines.includes(mod.id) ? 'rotate-90' : ''"
+                :class="
+                  collapsedPipelines.includes(mod.id + i) ? 'rotate-90' : ''
+                "
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -375,14 +376,18 @@
           </div>
         </div>
 
-        <!-- Options panel -->
         <Transition name="fade-scale">
-          <RecepieOptions
-            @click.stop
-            v-if="collapsedPipelines.includes(mod.id)"
-            :module="mod"
-            @update="data => (mod.options[data.key].value = data.value)"
-          />
+          <div v-if="collapsedPipelines.includes(mod.id + i)" @click.stop>
+            <!-- Description -->
+            <div class="text-center text-sm text-xs p-2 opacity-80">
+              {{ mod.description }}
+            </div>
+            <!-- Options panel -->
+            <RecepieOptions
+              :module="mod"
+              @update="data => (mod.options[data.key].value = data.value)"
+            />
+          </div>
         </Transition>
       </div>
     </div>

@@ -36,7 +36,7 @@
             </g>
           </svg>
         </div>
-        <div class="mb-3">{{ $t("app.title") }} - 0.0.5</div>
+        <div class="mb-3">{{ $t("app.title") }} - 0.0.6</div>
       </div>
       <!-- PWA Install button -->
       <div

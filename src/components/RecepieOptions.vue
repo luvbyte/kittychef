@@ -16,10 +16,19 @@
         v-if="opt.type === 'text'"
         type="text"
         :placeholder="opt.placeholder"
-        class="input input-sm input-bordered w-full bg-transparent focus:outline-none"
+        class="input input-sm input-bordered w-full bg-transparent focus:outline-none placeholder:opacity-60"
         :value="opt.value"
         @input="e => emit('update', { key, value: e.target.value })"
       />
+
+      <!-- TEXTAREA -->
+      <textarea
+        v-if="opt.type === 'textarea'"
+        :placeholder="opt.placeholder"
+        class="textarea textarea-sm textarea-bordered w-full bg-transparent focus:outline-none placeholder:opacity-60"
+        :value="opt.value"
+        @input="e => emit('update', { key, value: e.target.value })"
+      ></textarea>
 
       <!-- SELECT -->
       <select
@@ -36,7 +45,7 @@
         v-if="opt.type === 'number'"
         type="number"
         :placeholder="opt.placeholder"
-        class="input input-sm input-bordered w-full bg-transparent focus:outline-none"
+        class="input input-sm input-bordered w-full bg-transparent focus:outline-none placeholder:opacity-60"
         :value="opt.value"
         @input="e => emit('update', { key, value: Number(e.target.value) })"
       />

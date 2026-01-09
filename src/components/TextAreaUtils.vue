@@ -1,77 +1,90 @@
 <script setup lang="ts">
+  import { computed } from "vue";
+  import { copyText, pasteText } from "@/utils";
+
+  /* ================= PROPS / EMITS ================= */
+
   const props = defineProps<{
     text: string;
   }>();
 
-  const emit = defineEmits(["update:text"]);
+  const emit = defineEmits<{
+    (e: "update:text", val: string): void;
+  }>();
 
-  const update = (val: string) => emit("update:text", val);
+  /* ================= DERIVED TEXT ================= */
 
-  // IMPORT FILE
+  const text = computed(() => props.text);
+
+  function updateText(val: string) {
+    emit("update:text", val);
+  }
+
+  /* ================= IMPORT FILE ================= */
+
   function importFile() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".txt,.json,.md,.csv,.log,.html,.xml,*/*";
 
     input.onchange = async e => {
-      const file = e.target.files?.[0];
+      const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-      const text = await file.text();
-
-      // Replace OR append?
-      // You can decide. I use REPLACE (better for editing).
-      update(text);
-
-      // If you want APPEND instead:
-      // update(props.text + "\n" + text);
+      const content = await file.text();
+      updateText(content);
     };
 
     input.click();
   }
 
-  function copyText() {
-    navigator.clipboard.writeText(props.text || "");
+  /* ================= CLIPBOARD ================= */
+
+  function copy() {
+    copyText(text.value);
   }
 
-  function pasteText() {
-    navigator.clipboard.readText().then(pasted => {
-      update(props.text + pasted);
-    });
+  async function paste() {
+    const pasted = await pasteText();
+    updateText(text.value + pasted);
   }
+
+  /* ================= BASIC ACTIONS ================= */
 
   function clearText() {
-    update("");
+    updateText("");
   }
 
   function selectAll() {
-    const el = document.getElementById("textarea-ref");
-    if (el) el.select();
+    const el = document.getElementById("input-box-ref") as HTMLTextAreaElement;
+    el?.select();
   }
 
+  /* ================= TRANSFORMS ================= */
+
   function toUppercase() {
-    update(props.text.toUpperCase());
+    updateText(text.value.toUpperCase());
   }
 
   function toLowercase() {
-    update(props.text.toLowerCase());
+    updateText(text.value.toLowerCase());
   }
 
   function reverseText() {
-    update(props.text.split("").reverse().join(""));
+    updateText([...text.value].reverse().join(""));
   }
 
   function trimText() {
-    update(props.text.trim());
+    updateText(text.value.trim());
   }
 
   function removeSpaces() {
-    update(props.text.replace(/\s+/g, ""));
+    updateText(text.value.replace(/\s+/g, ""));
   }
 
   function removeBlankLines() {
-    update(
-      props.text
+    updateText(
+      text.value
         .split(/\r?\n/)
         .filter(l => l.trim() !== "")
         .join("\n")
@@ -79,9 +92,8 @@
   }
 
   function swapCase() {
-    update(
-      props.text
-        .split("")
+    updateText(
+      [...text.value]
         .map(ch =>
           ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase()
         )
@@ -90,7 +102,7 @@
   }
 
   function insertTimestamp() {
-    update(props.text + "\n" + new Date().toISOString());
+    updateText(text.value + new Date().toISOString());
   }
 </script>
 
@@ -101,10 +113,10 @@
     <button class="btn btn-xs btn-primary" @click="importFile">
       {{ $t("text_utils.import") }}
     </button>
-    <button class="btn btn-xs btn-primary" @click="copyText">
+    <button class="btn btn-xs btn-primary" @click="copy">
       {{ $t("text_utils.copy") }}
     </button>
-    <button class="btn btn-xs btn-primary" @click="pasteText">
+    <button class="btn btn-xs btn-primary" @click="paste">
       {{ $t("text_utils.paste") }}
     </button>
 

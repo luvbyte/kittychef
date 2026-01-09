@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  import { copyText, pasteText } from "@/utils";
+
   const props = defineProps<{
     text: string;
   }>();
@@ -19,23 +21,22 @@
 
       const text = await file.text();
 
-      // Replace OR append?
-      // You can decide. I use REPLACE (better for editing).
+      // REPLACE
       update(text);
 
-      // If you want APPEND instead:
+      // APPEND
       // update(props.text + "\n" + text);
     };
 
     input.click();
   }
 
-  function copyText() {
-    navigator.clipboard.writeText(props.text || "");
+  function copy() {
+    copyText(props.text);
   }
 
-  function pasteText() {
-    navigator.clipboard.readText().then(pasted => {
+  function paste() {
+    pasteText().then(pasted => {
       update(props.text + pasted);
     });
   }
@@ -45,7 +46,7 @@
   }
 
   function selectAll() {
-    const el = document.getElementById("textarea-ref");
+    const el = document.getElementById("input-box-ref");
     if (el) el.select();
   }
 
@@ -90,7 +91,7 @@
   }
 
   function insertTimestamp() {
-    update(props.text + "\n" + new Date().toISOString());
+    update(props.text + new Date().toISOString());
   }
 </script>
 
@@ -101,10 +102,10 @@
     <button class="btn btn-xs btn-primary" @click="importFile">
       {{ $t("text_utils.import") }}
     </button>
-    <button class="btn btn-xs btn-primary" @click="copyText">
+    <button class="btn btn-xs btn-primary" @click="copy">
       {{ $t("text_utils.copy") }}
     </button>
-    <button class="btn btn-xs btn-primary" @click="pasteText">
+    <button class="btn btn-xs btn-primary" @click="paste">
       {{ $t("text_utils.paste") }}
     </button>
 

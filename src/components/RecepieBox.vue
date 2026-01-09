@@ -6,6 +6,19 @@
 
   const search = ref("");
 
+  const activeModuleId = ref(null);
+
+  function onModuleTap(m) {
+    if (activeModuleId.value === m.id) {
+      // Second tap → select module
+      selectModule(m);
+      activeModuleId.value = null;
+    } else {
+      // First tap → show description
+      activeModuleId.value = m.id;
+    }
+  }
+
   const filteredGroups = computed(() => {
     const term = search.value.trim().toLowerCase();
     if (!term) return props.grouped;
@@ -137,14 +150,26 @@
             <div
               class="flex flex-col my-2 gap-1 sm:grid sm:grid-cols-2 md:grid-cols-3"
             >
-              <button
+              <div
                 v-for="m in mods"
                 :key="m.id"
-                class="text-left text-xs p-2 rounded-md bg-primary text-primary-content glass font-semibold"
-                @click="selectModule(m)"
+                class="relative text-left text-xs p-2 rounded-md bg-primary text-primary-content glass font-semibold cursor-pointer"
+                @click="onModuleTap(m)"
               >
-                {{ m.name }}
-              </button>
+                <h1>
+                  {{ m.name }}
+                </h1>
+
+                <transition name="slide-down" mode="out-in">
+                  <div
+                    v-if="activeModuleId === m.id"
+                    :key="m.id"
+                    class="mt-2 rounded-md bg-base-200/60 p-2 text-xs text-base-content shadow"
+                  >
+                    {{ m.description ?? "No description" }}
+                  </div>
+                </transition>
+              </div>
             </div>
           </div>
         </div>

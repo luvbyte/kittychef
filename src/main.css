@@ -18,7 +18,7 @@
   border-bottom-right-radius: 0;
 }
 
-.fullscreen {
+full {
   @apply w-full h-full
 }
 
@@ -147,4 +147,15 @@
 .slide-down-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }

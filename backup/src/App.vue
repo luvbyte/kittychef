@@ -1,6 +1,14 @@
 <script setup>
-  import { ref, watch } from "vue";
-  import { toggleFullScreen } from "./utils";
+  import { ref, computed, watch, nextTick } from "vue";
+  import {
+    toggleFullScreen,
+    copyText,
+    debounce,
+    toBytes,
+    toText,
+    bytesToHex,
+    bytesToBase64
+  } from "./utils";
 
   import Insight from "@/components/Insight.vue";
   import Sidebar from "@/components/Sidebar.vue";
@@ -11,58 +19,59 @@
   import RecepieOptions from "@/components/RecepieOptions.vue";
   import RecepiePipelineTree from "@/components/RecepiePipelineTree.vue";
 
-  import { modules } from "@/modules";
+  import { Data } from "@/core";
+  import modules from "@/core/modules";
+
+  /* ---------------- UI STATE ---------------- */
 
   const showRecepieBox = ref(false);
   const showThemeSwitcher = ref(false);
   const showRecepiePipelineTree = ref(false);
-
   const showSideBar = ref(false);
 
   const inputFullScreen = ref(false);
-
-  const liveUpdate = ref(true);
-
-  const inputBox = ref("");
-  const outputBox = ref("");
-
+  const showInputBox = ref(true);
   const showOutputBox = ref(true);
   const fullScreenLevel = ref(0);
 
+  const liveUpdate = ref(true);
+  const outputMode = ref("text"); // "text" | "hex" | "base64"
+
   const inputBoxLocked = ref(false);
+
+  /* ---------------- PIPELINE STATE ---------------- */
+
+  // UI text
+  const inputText = ref("");
+
+  // Bytes (ONLY bytes)
+  const inputBytes = computed(() => toBytes(inputText.value));
+  const outputBytes = ref(new Uint8Array());
+
+  // Rendered output text (VIEW ONLY)
+  const outputText = computed(() => {
+    if (!outputBytes.value || outputBytes.value.length === 0) return "";
+
+    switch (outputMode.value) {
+      case "hex":
+        return bytesToHex(outputBytes.value);
+      case "base64":
+        return bytesToBase64(outputBytes.value);
+      default:
+        return toText(outputBytes.value);
+    }
+  });
+
+  /* ---------------- PIPELINE ---------------- */
 
   const recepiePipeline = ref([]);
   const selectedModule = ref(null);
   const selectedModuleIndex = ref(null);
+  const isPipelineError = ref(false);
 
-  // Live Update
-  let stopWatcher = null;
+  const modulesChipsRef = ref(null);
 
-  watch(
-    () => liveUpdate.value,
-    enabled => {
-      // stop old watcher if exists
-      if (stopWatcher) {
-        stopWatcher();
-        stopWatcher = null;
-      }
-
-      // create new watcher if enabled
-      if (enabled) {
-        stopWatcher = watch([inputBox, recepiePipeline], compilePipeline, {
-          deep: true
-        });
-      }
-    },
-    { immediate: true }
-  );
-
-  function onToggleFullScreen() {
-    const LAST = showOutputBox.value && outputBox.value.length > 0 ? 3 : 2;
-
-    if (fullScreenLevel.value >= LAST) fullScreenLevel.value = 0;
-    else fullScreenLevel.value += 1;
-  }
+  /* ---------------- HELPERS ---------------- */
 
   function showRecepieOptions(m) {
     const idx = recepiePipeline.value.indexOf(m);
@@ -70,95 +79,151 @@
     selectedModule.value = recepiePipeline.value[idx];
   }
 
+  function scrollModuleChipsboxToRight() {
+    if (modulesChipsRef.value) {
+      modulesChipsRef.value.scrollTo({
+        left: modulesChipsRef.value.scrollWidth,
+        behavior: "smooth"
+      });
+    }
+  }
+
+  function onToggleFullScreen() {
+    fullScreenLevel.value =
+      fullScreenLevel.value >= 2 ? 0 : fullScreenLevel.value + 1;
+  }
+
   function groupModulesByCategory(modsObj) {
     const groups = {};
-
     for (const id in modsObj) {
       const mod = modsObj[id];
-      if (!groups[mod.category]) {
-        groups[mod.category] = [];
-      }
+      if (!groups[mod.category]) groups[mod.category] = [];
       groups[mod.category].push(mod);
     }
-
     return groups;
   }
 
-  // clone module object
   function cloneModule(m) {
-    const clone = { ...m }; // keeps run()
-
+    const clone = { ...m };
     clone.options = {};
-
     for (const key in m.options) {
       const opt = m.options[key];
-
-      clone.options[key] = {
-        ...opt,
-        value: opt.default ?? ""
-      };
+      clone.options[key] = { ...opt, value: opt.default ?? "" };
     }
-
     return clone;
   }
 
-  // static grouped
+  const hasOptions = computed(() => {
+    const opts = selectedModule.value?.options;
+    return opts && Object.keys(opts).length > 0;
+  });
+
   const grouped = groupModulesByCategory(modules);
+
+  /* ---------------- MODULE ACTIONS ---------------- */
 
   function selectModule(m) {
     recepiePipeline.value.push(cloneModule(m));
+    nextTick(scrollModuleChipsboxToRight);
   }
 
-  // clear pipeline
   function clearPipeline() {
     recepiePipeline.value.length = 0;
-    selectModule.value = null;
+    selectedModule.value = null;
+    isPipelineError.value = false;
   }
-  // clear both text boxea
+
   function clearTextBoxes() {
-    inputBox.value = "";
-    outputBox.value = "";
+    inputText.value = "";
+    outputBytes.value = new Uint8Array();
   }
-  // copy output box text
+
   function copyOutputBox() {
-    navigator.clipboard.writeText(outputBox.value);
+    copyText(outputText.value);
   }
-  // swap both input boxes
+
   function swapTextBox() {
-    [inputBox.value, outputBox.value] = [outputBox.value, inputBox.value];
+    const tmp = inputText.value;
+    inputText.value = outputText.value;
+    outputBytes.value = toBytes(tmp);
   }
 
-  function toggleLiveUpdate() {
-    liveUpdate.value = !liveUpdate.value;
-    compilePipeline();
-  }
+  /* ---------------- PIPELINE EXECUTION ---------------- */
 
-  // Start Compile pipeline and display in output box
-  function compilePipeline() {
-    let result = Promise.resolve(inputBox.value);
+  let runId = 0;
 
-    for (const mod of recepiePipeline.value) {
-      const options = {};
+  async function compilePipeline() {
+    const id = ++runId;
+    isPipelineError.value = false;
 
-      for (const key in mod.options) {
-        options[key] = mod.options[key].value;
+    // Explicitly declare input type
+    let data = new Data(inputBytes.value, "byteArray");
+
+    try {
+      for (const [index, mod] of recepiePipeline.value.entries()) {
+        if (id !== runId) return;
+
+        try {
+          const options = Object.fromEntries(
+            Object.entries(mod.options).map(([k, v]) => [k, v.value])
+          );
+
+          const inputType = mod.inputType ?? "byteArray";
+          const outputType = mod.outputType ?? "byteArray";
+
+          const result = await mod.run(data.getData(inputType), options);
+
+          // Convert + store correctly
+          data.setData(result, outputType);
+        } catch (err) {
+          throw new Error(
+            `Error in module ${index + 1} ${mod.name}: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        }
       }
 
-      // chain sync or async module
-      result = result
-        .then(r => mod.run(r, options)) // handles sync + async safely
-        .catch(err => {
-          return "Error in module " + mod.name + ": " + err;
-        });
+      if (id === runId) {
+        // Always emit bytes
+        outputBytes.value = data.getData("byteArray");
+      }
+    } catch (err) {
+      if (id === runId) {
+        outputBytes.value = toBytes(
+          err instanceof Error ? err.message : String(err)
+        );
+        isPipelineError.value = true;
+      }
     }
+  }
 
-    // output
-    result.then(final => {
-      outputBox.value = final;
-    });
+  const compilePipelineDebounced = debounce(compilePipeline, 300);
+
+  /* ---------------- LIVE UPDATE ---------------- */
+
+  watch(
+    [inputBytes, recepiePipeline],
+    () => {
+      if (liveUpdate.value) compilePipelineDebounced();
+    },
+    { deep: true }
+  );
+
+  /* ---------------- BOX TOGGLING ---------------- */
+
+  function toggleBoxes() {
+    if (showInputBox.value && showOutputBox.value) {
+      showOutputBox.value = false;
+    } else if (showInputBox.value) {
+      showInputBox.value = false;
+      showOutputBox.value = true;
+    } else {
+      showInputBox.value = true;
+      showOutputBox.value = true;
+    }
   }
 </script>
-
 <template>
   <div
     id="main"
@@ -254,7 +319,7 @@
       <Transition name="slide-left">
         <div
           v-show="showThemeSwitcher"
-          class="absolute top-13 right-0 w-3/4 sm:w-2/3 max-h-[400px] overflow-y-auto"
+          class="absolute top-12 right-0 w-3/4 sm:w-2/3 max-h-[400px] overflow-y-auto"
         >
           <ThemeSwitcher />
         </div>
@@ -332,16 +397,16 @@
             </svg>
           </button>
         </div>
-        <TextAreaUtils v-model:text="inputBox" />
+        <TextAreaUtils v-model:text="inputText" />
       </div>
       <!-- Input Box & Output Box -->
       <div class="flex-1 flex flex-col md:flex-row">
         <!-- Input -->
-        <div v-if="fullScreenLevel < 3" class="flex-1 flex flex-col">
+        <div v-if="showInputBox" class="flex-1 flex flex-col">
           <textarea
-            id="textarea-ref"
+            id="input-box-ref"
             placeholder="Input Text Here..."
-            v-model="inputBox"
+            v-model="inputText"
             spellcheck="off"
             autocorrect="off"
             autocapitalize="off"
@@ -352,29 +417,32 @@
           ></textarea>
           <!-- Quick Insight -->
           <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
-            <Insight :text="inputBox" showLines showBytes />
+            <Insight :text="inputText" :isInputBox="true" />
           </div>
         </div>
 
-        <div class="divider divider-horizontal m-0"></div>
+        <div
+          v-if="showInputBox && showOutputBox"
+          class="divider divider-horizontal m-0"
+        ></div>
 
         <!-- Output -->
-        <div
-          v-if="showOutputBox && inputBox.length > 0"
-          class="flex-1 bg-base-100 flex flex-col"
-        >
+        <div v-if="showOutputBox" class="flex-1 bg-base-100 flex flex-col">
           <textarea
-            v-model="outputBox"
+            v-model="outputText"
+            id="output-box-ref"
             @dblclick="copyOutputBox"
             readonly
             spellcheck="false"
             autocorrect="off"
             autocapitalize="off"
-            class="w-full h-full resize-none p-1 bg-base-100/10 focus:outline-none text-base-content/60"
+            placeholder="Output ..."
+            class="w-full h-full resize-none px-1 bg-base-100/10 focus:outline-none placeholder:opacity-80"
+            :class="isPipelineError ? 'text-error' : 'text-base-content/60'"
           ></textarea>
           <!-- output quick insight -->
           <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
-            <Insight :text="outputBox" showLines showBytes />
+            <Insight :text="outputText" :isInputBox="false" />
           </div>
         </div>
       </div>
@@ -437,18 +505,47 @@
           <div
             class="h-1/2 w-full bg-secondary/60 text-secondary-content/80 flex justify-between items-center"
           >
-            <!-- remaining (emoticon) -->
+            <!-- Emoji -->
             <div class="flex-1">
               <Emoticon />
             </div>
 
             <!-- Toggle Output Box Button -->
             <button
-              @click="showOutputBox = !showOutputBox"
+              @click="toggleBoxes"
               class="h-full px-2 bg-secondary/60 flex items-center gap-1"
             >
+              <!-- Both True -->
               <svg
-                v-if="showOutputBox"
+                v-if="showInputBox && showOutputBox"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M21.707 9.777V8.313H2.428v1.334L2 9.644v.834l2.052 5.209h16.392L22 10.433v-.654Zm-2.368 5.481H5.044S3.714 11 3.623 10.929h16.889z"
+                />
+              </svg>
+              <svg
+                v-else-if="showOutputBox"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 21 21"
+              >
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M5.5 3.5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2m1 12h8"
+                  stroke-width="1"
+                />
+              </svg>
+              <svg
+                v-else-if="showInputBox"
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
                 height="24"
@@ -461,18 +558,6 @@
                   stroke-linejoin="round"
                   d="M5.5 3.5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2m1 2h8"
                   stroke-width="1"
-                />
-              </svg>
-              <svg
-                v-else
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M21.707 9.777V8.313H2.428v1.334L2 9.644v.834l2.052 5.209h16.392L22 10.433v-.654Zm-2.368 5.481H5.044S3.714 11 3.623 10.929h16.889z"
                 />
               </svg>
               <span class="hidden sm:block">{{ $t("btn.output") }}</span>
@@ -642,6 +727,7 @@
             </button>
             <!-- Module chips -->
             <div
+              ref="modulesChipsRef"
               class="flex-1 py-1 pr-1 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth whitespace-nowrap select-none flex-shrink-0"
             >
               <!-- middle modules / recepies list -->
@@ -681,15 +767,42 @@
     <Transition name="fade-scale">
       <div
         v-if="selectedModule"
-        class="fixed top-0 left-0 w-full h-full flex flex-col items-center px-8 justify-center bg-base-100/80"
-        @click="selectedModule = null"
+        class="fixed top-0 left-0 w-full h-full flex flex-col items-center px-8 justify-center bg-black/60"
+        @click.self="selectedModule = null"
       >
         <div
-          @click.stop
-          class="w-full min-h-[25rem] sm:min-h-[50%] sm:w-[50%] bg-base-100 border rstyle border-base-content/60 overflow-y-auto"
+          class="w-full h-[25rem] sm:h-[50%] sm:w-[50%] rstyle bg-base-100 shadow-lg flex flex-col overflow-hidden"
         >
-          <h3  class="font-bold text-lg mb-2">{{ selectedModule.name }} Options</h3>
+          <!-- HEAD -->
+          <div
+            class="flex items-center justify-between p-2 py-3 bg-primary text-primary-content glass"
+          >
+            <h1 class="font-bold text-lg">{{ selectedModule.name }} Options</h1>
 
+            <!-- close btn -->
+            <button @click="selectedModule = null" class="opacity-80">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="p-2 opacity-60 text-center text-xs">
+            {{ selectedModule.description }}
+          </div>
+
+          <div v-if="!hasOptions" class="p-2 text-center opacity-80">
+            No options required
+          </div>
+          <!-- Options -->
           <RecepieOptions
             :module="selectedModule"
             @update="
@@ -723,7 +836,7 @@
     </Transition>
     <!-- Sidebar -->
     <div
-      class="fixed inset-0 z-20 fullscreen overflow-hidden"
+      class="fixed inset-0 z-20 full overflow-hidden"
       @click.self="showSideBar = false"
       :class="{ 'pointer-events-none -z-20': !showSideBar }"
     >
