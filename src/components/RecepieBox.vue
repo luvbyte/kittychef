@@ -85,8 +85,12 @@
         </div>
         <div class="font-bold pt-1">{{ $t("headings.select_a_recepie") }}</div>
       </div>
-      <!-- Close Button -->
-      <button @click="props.close">
+
+            <!-- Close button -->
+      <button
+        @click="props.close"
+        class="badge rounded-full w-8 h-8 flex items-center justify-center p-0"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"

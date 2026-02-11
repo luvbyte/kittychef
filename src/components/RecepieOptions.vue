@@ -57,7 +57,7 @@
       >
         <input
           type="checkbox"
-          class="checkbox checkbox-secondary"
+          class="checkbox checkbox-info"
           :checked="opt.value"
           @change="e => emit('update', { key, value: e.target.checked })"
         />

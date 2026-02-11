@@ -15,7 +15,6 @@
   import Emoticon from "@/components/Emoticon.vue";
   import RecepieBox from "@/components/RecepieBox.vue";
   import TextAreaUtils from "@/components/TextAreaUtils.vue";
-  import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
   import RecepieOptions from "@/components/RecepieOptions.vue";
   import RecepiePipelineTree from "@/components/RecepiePipelineTree.vue";
 
@@ -25,7 +24,6 @@
   /* ---------------- UI STATE ---------------- */
 
   const showRecepieBox = ref(false);
-  const showThemeSwitcher = ref(false);
   const showRecepiePipelineTree = ref(false);
   const showSideBar = ref(false);
 
@@ -107,6 +105,7 @@
     return groups;
   }
 
+  // clone options
   function cloneModule(m) {
     const clone = { ...m };
     clone.options = {};
@@ -158,9 +157,27 @@
   }
 
   /* ---------------- PIPELINE EXECUTION ---------------- */
-
   let runId = 0;
 
+  // validate options
+  function checkOptions(original = {}, options = {}) {
+    for (const [key, def] of Object.entries(original)) {
+      if (!def?.required) continue;
+
+      const value = options[key];
+
+      const isMissing =
+        value === undefined ||
+        value === null ||
+        (typeof value === "string" && value.trim() === "");
+
+      if (isMissing) {
+        throw new Error(`Option "${key}" is required`);
+      }
+    }
+  }
+
+  // Compile Pipeline
   async function compilePipeline() {
     const id = ++runId;
     isPipelineError.value = false;
@@ -180,13 +197,39 @@
           const inputType = mod.inputType ?? "byteArray";
           const outputType = mod.outputType ?? "byteArray";
 
+          const currentDataType = data.getCurrentDataType();
+
+          // if strict type checking
+          if (mod.strictType && inputType !== currentDataType) {
+            throw new Error(
+              `DataType mismatch: expected "${currentDataType}", received "${inputType}".`
+            );
+          }
+
+          // check options
+          checkOptions(mod.options, options);
+
+          // Run prechecks if function "precheck"
+          if (typeof mod.precheck === "function") {
+            try {
+              mod.precheck(currentDataType, options);
+            } catch (err) {
+              throw new Error(
+                `Precheck failed: ${
+                  err instanceof Error ? err.message : String(err)
+                }`
+              );
+            }
+          }
+
+          // run module function "run"
           const result = await mod.run(data.getData(inputType), options);
 
           // Convert + store correctly
           data.setData(result, outputType);
         } catch (err) {
           throw new Error(
-            `Error in module ${index + 1} ${mod.name}: ${
+            `Error in module ( ${index + 1} ) ${mod.name}: ${
               err instanceof Error ? err.message : String(err)
             }`
           );
@@ -237,29 +280,14 @@
   <div
     id="main"
     data-theme="light"
-    class="h-dvh flex flex-col overflow-hidden font-body"
+    class="h-dvh flex flex-col overflow-hidden font-body transition-colors duration-600"
   >
     <!-- Header / Navbar -->
     <div
       v-show="fullScreenLevel < 1"
-      class="relative bg-primary glass text-primary-content p-2 py-3 flex justify-between items-center shadow-lg font-heading"
+      class="glass bg-primary text-primary-content p-2 py-3 flex justify-between items-center font-heading shadow-sm"
     >
       <button @click="showSideBar = true" class="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 32 32"
-        >
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 8h22M5 16h22M5 24h22"
-          />
-        </svg>
         <!-- cat icon -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -306,7 +334,7 @@
         <!-- Theme -->
         <button
           class="flex items-center gap-1 hover:cursor-pointer"
-          @click="showThemeSwitcher = !showThemeSwitcher"
+          @click="showSideBar = true"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -323,22 +351,13 @@
           <span class="sm:block">{{ $t("btn.theme") }}</span>
         </button>
       </div>
-
-      <!-- Theme switcher -->
-      <Transition name="slide-left">
-        <div
-          v-show="showThemeSwitcher"
-          class="absolute top-12 right-0 w-3/4 sm:w-2/3 max-h-[400px] overflow-y-auto"
-        >
-          <ThemeSwitcher />
-        </div>
-      </Transition>
     </div>
 
     <!-- Main Layout -->
     <div class="flex-1 flex flex-col">
       <!-- InputBox Top Utils-->
       <div
+        v-if="showInputBox"
         class="p-1 pt-2 flex items-center gap-1 overflow-x-auto scrollbar-hide"
       >
         <div class="flex items-center gap-2 px-1">
@@ -423,20 +442,27 @@
             :readonly="inputBoxLocked"
             inputmode="text"
             class="flex-1 resize-none px-1 bg-base-100/20 text-base-content/60 focus:outline-none placeholder:opacity-80"
+            :class="{
+              'md:border-l border-base-content/20':
+                showInputBox && showOutputBox
+            }"
           ></textarea>
           <!-- Quick Insight -->
-          <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
+          <div
+            class="p-1 bg-base-200 text-base-content flex gap-2 text-xs text-base-content/70"
+          >
             <Insight :text="inputText" :isInputBox="true" />
           </div>
         </div>
 
-        <div
-          v-if="showInputBox && showOutputBox"
-          class="divider divider-horizontal m-0"
-        ></div>
-
+        <div v-if="false" class="relative">
+          <div
+            v-if="showInputBox && showOutputBox"
+            class="absolute top-1/2 -translate-y-1/2 h-[90%] divider divider-horizontal m-0"
+          ></div>
+        </div>
         <!-- Output -->
-        <div v-if="showOutputBox" class="flex-1 bg-base-100 flex flex-col">
+        <div v-if="showOutputBox" class="flex-1 flex flex-col">
           <textarea
             v-model="outputText"
             id="output-box-ref"
@@ -447,10 +473,18 @@
             autocapitalize="off"
             placeholder="Output ..."
             class="w-full h-full resize-none px-1 bg-base-100/10 focus:outline-none placeholder:opacity-80"
-            :class="isPipelineError ? 'text-error' : 'text-base-content/60'"
+            :class="[
+              isPipelineError ? 'text-error' : 'text-base-content/60',
+              {
+                'md:border-l border-base-content/20':
+                  showInputBox && showOutputBox
+              }
+            ]"
           ></textarea>
           <!-- output quick insight -->
-          <div class="p-1 bg-base-300 flex gap-2 text-xs text-base-content/70">
+          <div
+            class="p-1 bg-base-200 text-base-content flex gap-2 text-xs text-base-content/70"
+          >
             <Insight :text="outputText" :isInputBox="false" />
           </div>
         </div>
@@ -464,7 +498,7 @@
         <div class="flex flex-col h-full min-w-10 sm:min-w-32">
           <!-- live update button -->
           <button
-            class="h-1/2 w-full flex items-center justify-center transition gap-1 text-secondary-content hover:cursor-pointer"
+            class="h-1/2 w-full flex items-center justify-center md:gap-2 transition gap-1 text-secondary-content hover:cursor-pointer"
             :class="liveUpdate ? 'bg-secondary/80' : 'bg-secondary/60'"
             @click="toggleLiveUpdate"
           >
@@ -757,18 +791,21 @@
         </div>
       </div>
     </div>
-    <!-- kittychef quick insight -->
+    <!-- kittychef quick tools -->
     <div
       v-if="fullScreenLevel < 2"
-      class="p-1 px-2 bg-primary/60 flex gap-2 text-xs text-base-content/70 font-heading"
+      class="p-1 px-2 bg-primary/60 flex gap-1 text-xs text-base-content/70 font-heading"
     >
       <span class="px-2 py-0.5 rounded bg-primary/60 text-primary-content">
         {{ $t("insight.live") }}
-        <strong class="ml-1">{{ liveUpdate ? "Yes" : "No" }}</strong>
+        <strong>{{ liveUpdate ? "Yes" : "No" }}</strong>
       </span>
-      <span class="px-2 py-0.5 rounded bg-primary/60 text-primary-content">
+      <span
+        v-if="recepiePipeline.length"
+        class="px-2 py-0.5 rounded bg-primary/60 text-primary-content"
+      >
         {{ $t("insight.recepies") }}
-        <strong class="ml-1">{{ recepiePipeline.length }}</strong>
+        <strong>{{ recepiePipeline.length }}</strong>
       </span>
     </div>
 
@@ -851,7 +888,7 @@
     >
       <!-- SIDEBAR -->
       <Transition name="slide-right">
-        <div v-if="showSideBar" class="relative h-full w-3/4 sm:w-1/3 glass">
+        <div v-show="showSideBar" class="relative h-full w-3/4 sm:w-1/3 glass">
           <Sidebar />
         </div>
       </Transition>

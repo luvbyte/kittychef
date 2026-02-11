@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { ref, onMounted, onBeforeUnmount } from "vue";
 
-  const idleFrames = ["😺", "😺", "😸", "😺"];
+  const idleFrames = ["😺", "😼", "😸", "😺"];
   const loveBurstFrames = ["😻", "😽", "😻"];
 
   const emoticon = ref(idleFrames[0]);
@@ -17,7 +17,7 @@
       if (isHovering || isBursting) return;
       frameIndex = (frameIndex + 1) % idleFrames.length;
       emoticon.value = idleFrames[frameIndex];
-    }, 300);
+    }, 600);
   }
 
   function stopLoop() {
@@ -29,7 +29,7 @@
 
   function onHover() {
     isHovering = true;
-    emoticon.value = "😻";
+    emoticon.value = "😿";
   }
 
   function onLeave() {

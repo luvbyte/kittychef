@@ -40,7 +40,7 @@
 
 <template>
   <div
-    class="w-full flex items-center justify-between gap-3 text-xs text-base-content/70 px-1 font-heading"
+    class="w-full flex items-center justify-between gap-3 text-xs px-1 font-heading"
   >
     <div
       class="flex gap-1 items-center *:shadow-lg *:shrink-0 overflow-x-auto scrollbar-hide"
@@ -72,24 +72,24 @@
         </svg>
       </span>
 
-      <span class="px-2 py-0.5 rounded bg-base-200">
-        {{ $t("insight.chars") }}<strong class="ml-1">{{ charCount }}</strong>
+      <span class="badge badge-sm">
+        {{ $t("insight.chars") }}<strong>{{ charCount }}</strong>
       </span>
 
-      <span class="px-2 py-0.5 rounded bg-base-200">
-        {{ $t("insight.words") }} <strong class="ml-1">{{ wordCount }}</strong>
+      <span class="badge badge-sm">
+        {{ $t("insight.words") }} <strong>{{ wordCount }}</strong>
       </span>
 
-      <span class="px-2 py-0.5 rounded bg-base-200">
-        {{ $t("insight.lines") }} <strong class="ml-1">{{ lineCount }}</strong>
+      <span class="badge badge-sm">
+        {{ $t("insight.lines") }} <strong>{{ lineCount }}</strong>
       </span>
 
-      <span class="px-2 py-0.5 rounded bg-base-200">
-        {{ $t("insight.bytes") }} <strong class="ml-1">{{ byteSize }}</strong>
+      <span class="badge badge-sm">
+        {{ $t("insight.bytes") }} <strong>{{ byteSize }}</strong>
       </span>
     </div>
 
-    <span class="pl-2 py-0.5 rounded">
+    <span v-if="text.length > 0" class="pl-2 py-0.5 rounded whitespace-nowrap">
       <strong>{{ encoding }}</strong>
     </span>
   </div>

@@ -97,4 +97,8 @@ export class Data {
     this._cache[targetType] = converted;
     return converted;
   }
+
+  getCurrentDataType() {
+    return Object.keys(this._cache)[0] || null;
+  }
 }

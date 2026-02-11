@@ -41,7 +41,6 @@
     options: {
       type: Array,
       required: true
-      // [{ label: 'Apple', value: 'apple' }]
     },
     placeholder: {
       type: String,

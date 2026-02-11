@@ -4,7 +4,7 @@ export default {
   json_pretty: {
     id: "json_pretty",
     name: "JSON Pretty Print",
-    category: "JSON",
+    category: "Json",
 
     description:
       "Formats JSON with indentation and line breaks to make it more readable.",
@@ -39,7 +39,7 @@ export default {
   json_minify: {
     id: "json_minify",
     name: "JSON Minify",
-    category: "JSON",
+    category: "Json",
 
     description:
       "Removes all unnecessary whitespace from JSON to produce a compact output.",
@@ -66,7 +66,7 @@ export default {
   json_filter: {
     id: "json_filter",
     name: "JSON Filter",
-    category: "JSON",
+    category: "Json",
 
     description:
       "Filters and transforms JSON using jq-style expressions (e.g. .foo.bar, .items[], .items[].name).",
@@ -80,14 +80,15 @@ export default {
         label: "Filter",
         placeholder: "e.g. .items[].name",
         default: "."
+      },
+      lines: {
+        type: "checkbox",
+        label: "Output as lines (no brackets)",
+        default: false
       }
     },
 
     run(input, options) {
-      if (typeof input !== "string") {
-        throw new Error("JSON jq expects string input");
-      }
-
       let data;
       try {
         data = JSON.parse(input);
@@ -99,6 +100,12 @@ export default {
 
       try {
         const result = applyJqFilter(data, filter);
+
+        if (options.lines && Array.isArray(result)) {
+          return result
+            .map(v => (typeof v === "string" ? v : JSON.stringify(v)))
+            .join("\n");
+        }
 
         // If it's already an object/array
         if (typeof result === "object" && result !== null) {
