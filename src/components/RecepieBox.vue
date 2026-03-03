@@ -1,12 +1,16 @@
 <script setup lang="ts">
   import { ref, computed } from "vue";
 
-  const props = defineProps(["grouped", "close"]);
-  const emit = defineEmits(["select"]);
+  const props = defineProps(["grouped"]);
+  const emit = defineEmits(["select", "close"]);
 
   const search = ref("");
 
   const activeModuleId = ref(null);
+
+  function close() {
+    emit("close");
+  }
 
   function onModuleTap(m) {
     if (activeModuleId.value === m.id) {
@@ -50,7 +54,7 @@
 
   function selectModule(m) {
     emit("select", m);
-    props.close();
+    close();
   }
 </script>
 
@@ -86,9 +90,9 @@
         <div class="font-bold pt-1">{{ $t("headings.select_a_recepie") }}</div>
       </div>
 
-            <!-- Close button -->
+      <!-- Close button -->
       <button
-        @click="props.close"
+        @click="close"
         class="badge rounded-full w-8 h-8 flex items-center justify-center p-0"
       >
         <svg

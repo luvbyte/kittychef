@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { ref } from "vue";
+  import { ref, computed } from "vue";
   import modules from "@/core/modules";
 
   import RecepieOptions from "@/components/RecepieOptions.vue";
@@ -8,8 +8,14 @@
     recepiePipeline: any[];
     clearPipeline: () => void;
     addRecepie: () => void;
-    close: () => void;
+    onSaveFile: () => void;
   }>();
+
+  const emit = defineEmits(["close"]);
+
+  function close() {
+    emit("close");
+  }
 
   const collapsedPipelines = ref([]);
 
@@ -56,28 +62,30 @@
     }
   }
 
-  // EXPORT  (ONLY IDs + option values)
+  const hasRecepies = computed(() => props.recepiePipeline.length > 0);
+
   function exportPipeline() {
+    if (!hasRecepies.value) return;
+
     const clean = props.recepiePipeline.map(mod => {
       const opts = {};
       for (const key in mod.options) {
         opts[key] = mod.options[key].value;
       }
+
       return {
         id: mod.id,
         options: opts
       };
     });
 
-    const data = JSON.stringify(clean, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
+    const json = JSON.stringify(clean, null, 2);
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "kittychef_pipeline.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    // Convert to Uint8Array
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(json);
+
+    props.onSaveFile(bytes, "application/json");
   }
 
   // IMPORT (REBUILD FROM modules OBJECT)
@@ -162,7 +170,7 @@
 
       <!-- Close button -->
       <button
-        @click="props.close"
+        @click="close"
         class="badge rounded-full w-8 h-8 flex items-center justify-center p-0"
       >
         <svg
@@ -228,6 +236,7 @@
         <!-- EXPORT -->
         <button
           @click="exportPipeline"
+          :class="{ 'opacity-40': !hasRecepies }"
           class="flex items-center gap-1 px-3 py-1 bg-secondary/80 text-secondary-content rounded shadow-lg active:bg-secondary transition"
         >
           <svg

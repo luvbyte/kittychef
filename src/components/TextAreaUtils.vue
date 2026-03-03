@@ -5,19 +5,26 @@
   /* ================= PROPS / EMITS ================= */
 
   const props = defineProps<{
-    text: string;
+    data: Uint8Array; //
   }>();
 
   const emit = defineEmits<{
-    (e: "update:text", val: string): void;
+    (e: "update:data", val: Uint8Array): void;
   }>();
 
-  /* ================= DERIVED TEXT ================= */
+  /* ================= TEXT <-> BINARY ================= */
 
-  const text = computed(() => props.text);
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
 
+  /* Convert incoming binary → string for UI */
+  const text = computed(() => {
+    return props.data ? decoder.decode(props.data) : "";
+  });
+
+  /* Emit string as Uint8Array */
   function updateText(val: string) {
-    emit("update:text", val);
+    emit("update:data", encoder.encode(val));
   }
 
   /* ================= IMPORT FILE ================= */
@@ -31,8 +38,8 @@
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-      const content = await file.text();
-      updateText(content);
+      const arrayBuffer = await file.arrayBuffer();
+      emit("update:data", new Uint8Array(arrayBuffer));
     };
 
     input.click();
@@ -110,47 +117,109 @@
   <div
     class="w-full flex gap-1 text-xs shrink-0 overflow-x-auto scroll-smooth scrollbar-hide font-heading pb-1"
   >
-    <button class="btn btn-xs btn-primary" @click="importFile">
+    <!-- Import -->
+    <button type="button" class="btn btn-xs btn-primary" @click="importFile">
       {{ $t("text_utils.import") }}
     </button>
-    <button class="btn btn-xs btn-primary" @click="copy">
+
+    <!-- Clipboard -->
+    <button
+      type="button"
+      class="btn btn-xs btn-primary"
+      :disabled="!text"
+      @click="copy"
+    >
       {{ $t("text_utils.copy") }}
     </button>
-    <button class="btn btn-xs btn-primary" @click="paste">
+
+    <button type="button" class="btn btn-xs btn-primary" @click="paste">
       {{ $t("text_utils.paste") }}
     </button>
 
-    <button class="btn btn-xs btn-secondary" @click="clearText">
+    <!-- Basic -->
+    <button
+      type="button"
+      class="btn btn-xs btn-secondary"
+      :disabled="!text"
+      @click="clearText"
+    >
       {{ $t("text_utils.clear") }}
     </button>
-    <button class="btn btn-xs btn-accent" @click="selectAll">
+
+    <button
+      type="button"
+      class="btn btn-xs btn-accent"
+      :disabled="!text"
+      @click="selectAll"
+    >
       {{ $t("text_utils.select") }}
     </button>
 
-    <button class="btn btn-xs" @click="toUppercase">
+    <!-- Transforms -->
+    <button
+      type="button"
+      class="btn btn-xs"
+      :disabled="!text"
+      @click="toUppercase"
+    >
       {{ $t("text_utils.upper") }}
     </button>
-    <button class="btn btn-xs" @click="toLowercase">
+
+    <button
+      type="button"
+      class="btn btn-xs"
+      :disabled="!text"
+      @click="toLowercase"
+    >
       {{ $t("text_utils.lower") }}
     </button>
 
-    <button class="btn btn-xs" @click="reverseText">
+    <button
+      type="button"
+      class="btn btn-xs"
+      :disabled="!text"
+      @click="reverseText"
+    >
       {{ $t("text_utils.reverse") }}
     </button>
-    <button class="btn btn-xs" @click="trimText">
+
+    <button
+      type="button"
+      class="btn btn-xs"
+      :disabled="!text"
+      @click="trimText"
+    >
       {{ $t("text_utils.trim") }}
     </button>
-    <button class="btn btn-xs" @click="removeSpaces">
+
+    <button
+      type="button"
+      class="btn btn-xs"
+      :disabled="!text"
+      @click="removeSpaces"
+    >
       {{ $t("text_utils.no_space") }}
     </button>
-    <button class="btn btn-xs" @click="removeBlankLines">
+
+    <button
+      type="button"
+      class="btn btn-xs"
+      :disabled="!text"
+      @click="removeBlankLines"
+    >
       {{ $t("text_utils.no_blank_lines") }}
     </button>
 
-    <button class="btn btn-xs" @click="swapCase">
+    <button
+      type="button"
+      class="btn btn-xs"
+      :disabled="!text"
+      @click="swapCase"
+    >
       {{ $t("text_utils.swap_case") }}
     </button>
-    <button class="btn btn-xs" @click="insertTimestamp">
+
+    <button type="button" class="btn btn-xs" @click="insertTimestamp">
       {{ $t("text_utils.timestamp") }}
     </button>
   </div>

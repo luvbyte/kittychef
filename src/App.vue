@@ -17,6 +17,7 @@
   import TextAreaUtils from "@/components/TextAreaUtils.vue";
   import RecepieOptions from "@/components/RecepieOptions.vue";
   import RecepiePipelineTree from "@/components/RecepiePipelineTree.vue";
+  import SaveFile from "@/components/SaveFile.vue";
 
   import { Data } from "@/core";
   import modules from "@/core/modules";
@@ -39,12 +40,19 @@
 
   /* ---------------- PIPELINE STATE ---------------- */
 
-  // UI text
-  const inputText = ref("");
-
   // Bytes (ONLY bytes)
   const inputBytes = ref(new Uint8Array());
   const outputBytes = ref(new Uint8Array());
+
+  // Computing from inputBytes
+  const inputText = computed({
+    get() {
+      return toText(inputBytes.value);
+    },
+    set(val) {
+      inputBytes.value = toBytes(val);
+    }
+  });
 
   // Rendered output text (VIEW ONLY)
   const outputText = computed(() => {
@@ -60,9 +68,8 @@
     }
   });
 
-  watch(inputText, val => {
-    inputBytes.value = toBytes(val);
-  });
+  // Save Data Panel
+  const saveFileData = ref(null);
 
   /* ---------------- PIPELINE ---------------- */
 
@@ -275,6 +282,18 @@
       showOutputBox.value = true;
     }
   }
+  /* ---------------- Utils ---------------- */
+
+  // 0 - input / 1 - output
+  function onSaveFile(data, dataType = null) {
+    saveFileData.value = {
+      data,
+      dataType
+    };
+  }
+  function onSaveFileClose() {
+    saveFileData.value = null;
+  }
 </script>
 <template>
   <div
@@ -425,7 +444,10 @@
             </svg>
           </button>
         </div>
-        <TextAreaUtils v-model:text="inputText" />
+        <TextAreaUtils
+          :data="inputBytes"
+          @update:data="val => (inputBytes = val)"
+        />
       </div>
       <!-- Input Box & Output Box -->
       <div class="flex-1 flex flex-col md:flex-row">
@@ -451,7 +473,11 @@
           <div
             class="p-1 bg-base-200 text-base-content flex gap-2 text-xs text-base-content/70"
           >
-            <Insight :text="inputText" :isInputBox="true" />
+            <Insight
+              :text="inputText"
+              :isInputBox="true"
+              @saveFile="onSaveFile(inputBytes)"
+            />
           </div>
         </div>
 
@@ -485,7 +511,11 @@
           <div
             class="p-1 bg-base-200 text-base-content flex gap-2 text-xs text-base-content/70"
           >
-            <Insight :text="outputText" :isInputBox="false" />
+            <Insight
+              :text="outputText"
+              :isInputBox="false"
+              @saveFile="onSaveFile(outputBytes)"
+            />
           </div>
         </div>
       </div>
@@ -867,19 +897,31 @@
         v-if="showRecepiePipelineTree"
         :recepiePipeline
         :clearPipeline
-        :close="() => (showRecepiePipelineTree = false)"
         :addRecepie="() => (showRecepieBox = true)"
+        :onSaveFile="onSaveFile"
+        @close="() => (showRecepiePipelineTree = false)"
       />
     </Transition>
+
     <!-- RecepieBox Modal -->
     <Transition name="fade-scale">
       <RecepieBox
         v-if="showRecepieBox"
         :grouped
         @select="selectModule"
-        :close="() => (showRecepieBox = false)"
+        @close="() => (showRecepieBox = false)"
       />
     </Transition>
+
+    <!-- SaveFile -->
+    <Transition name="fade-scale">
+      <SaveFile
+        v-if="saveFileData"
+        :file="saveFileData"
+        @close="saveFileData = null"
+      />
+    </Transition>
+
     <!-- Sidebar -->
     <div
       class="fixed inset-0 z-20 full overflow-hidden"

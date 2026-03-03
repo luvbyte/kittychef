@@ -1,6 +1,6 @@
 const DEFAULT_THEME = "caramellatte";
 
-export const VERSION = "0.0.7"
+export const VERSION = "0.0.8";
 
 export function getTheme() {
   return localStorage.getItem("theme") || DEFAULT_THEME;

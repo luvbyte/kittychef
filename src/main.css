@@ -22,6 +22,10 @@
   @apply w-full h-full
 }
 
+.fscreen {
+  @apply w-full h-full
+}
+
 h1 {
   @apply font-heading
 }
