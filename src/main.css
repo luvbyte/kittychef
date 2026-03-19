@@ -3,7 +3,55 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-  themes: all;
+  themes: 
+    light, dark, cupcake, bumblebee, emerald, corporate,
+    synthwave, retro, valentine, halloween, garden, forest,
+    lofi, pastel, fantasy, wireframe, black, luxury,
+    dracula, cmyk, autumn, business, acid, lemonade,
+    night, coffee, winter, dim, nord, sunset,
+    caramellatte, abyss, silk, catppuccino;
+}
+
+/* Custom Cute Cat Theme */
+@plugin "daisyui/theme" {
+  name: "catppuccino";
+  default: false;
+  prefersdark: false;
+
+  color-scheme: light;
+
+  /* colors */
+  --color-primary: #f4a9b8;
+  --color-secondary: #cba6f7;
+  --color-accent: #f9e2af;
+  --color-neutral: #6c5b7b;
+
+  --color-base-100: #fff7f9;
+  --color-base-200: #fceef3;
+  --color-base-300: #f8dfe7;
+  --color-base-content: #4a3b4f;
+
+  --color-info: #89b4fa;
+  --color-success: #a6e3a1;
+  --color-warning: #f9e2af;
+  --color-error: #f38ba8;
+
+  --rounded-box: 1.5rem;
+  --rounded-btn: 2rem;
+  --rounded-badge: 9999px;
+
+  --border-btn: 0px;
+
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+}
+
+.badge {
+  @apply px-2;
+}
+
+select, input {
+  @apply border;
 }
 
 @theme {

@@ -4,6 +4,8 @@
 
   import RecepieOptions from "@/components/RecepieOptions.vue";
 
+  import { VERSION } from "@/api/config";
+
   const props = defineProps<{
     recepiePipeline: any[];
     clearPipeline: () => void;
@@ -79,13 +81,21 @@
       };
     });
 
-    const json = JSON.stringify(clean, null, 2);
+    const json = JSON.stringify(
+      {
+        version: VERSION,
+        pipeline: clean,
+        total: clean.length
+      },
+      null,
+      2
+    );
 
     // Convert to Uint8Array
     const encoder = new TextEncoder();
     const bytes = encoder.encode(json);
 
-    props.onSaveFile(bytes, "application/json");
+    props.onSaveFile(bytes, "application/json", "recepies");
   }
 
   // IMPORT (REBUILD FROM modules OBJECT)
@@ -100,14 +110,16 @@
 
       try {
         const text = await file.text();
-        const imported = JSON.parse(text);
+        const data = JSON.parse(text);
 
-        if (!Array.isArray(imported)) {
+        const pipeline = data.pipeline;
+
+        if (!Array.isArray(pipeline)) {
           alert("Invalid pipeline file");
           return;
         }
 
-        const rebuilt = imported
+        const rebuilt = pipeline
           .map(item => {
             const base = modules[item.id]; // lookup module
             if (!base) return null;
@@ -136,9 +148,9 @@
           ...rebuilt
         );
 
-        alert("Pipeline imported successfully!");
+        alert("Recepie pipeline imported successfully!");
       } catch (err) {
-        alert("Failed to import pipeline: " + err.message);
+        alert("Failed to import Recepie pipeline: " + err.message);
       }
     };
 

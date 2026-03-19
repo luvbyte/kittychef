@@ -13,8 +13,8 @@
         <input
           v-model="filename"
           type="text"
-          placeholder="example"
-          class="input input-sm w-full max-w-md"
+          placeholder="Filename"
+          class="input input-sm w-full max-w-md focus:outline-none placeholder:opacity-60"
         />
       </div>
 
@@ -62,6 +62,7 @@
   interface SaveFilePayload {
     data: Uint8Array;
     dataType: SupportedType | null;
+    name: string | null;
   }
 
   const props = defineProps<{
@@ -72,7 +73,7 @@
     (e: "close"): void;
   }>();
 
-  const filename = ref("download");
+  const filename = ref(props.file.name || "output");
 
   // Used only if parent did NOT fix the type
   // const selectedType = ref<SupportedType>("application/octet-stream");

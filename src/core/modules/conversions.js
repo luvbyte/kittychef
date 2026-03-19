@@ -1,4 +1,54 @@
 export default {
+  textToBinary: {
+    id: "textToBinary",
+    name: "Text → Binary",
+    category: "Conversion",
+
+    description: "Converts text into binary (ASCII-based).",
+
+    inputType: "string",
+    outputType: "string",
+
+    options: {
+      separator: {
+        type: "text",
+        default: " "
+      }
+    },
+
+    run(input, options) {
+      const sep = options.separator ?? " ";
+      return input
+        .split("")
+        .map(char => char.charCodeAt(0).toString(2).padStart(8, "0"))
+        .join(sep);
+    }
+  },
+  binaryToText: {
+    id: "binaryToText",
+    name: "Binary → Text",
+    category: "Conversion",
+
+    description: "Converts binary values back into text.",
+
+    inputType: "string",
+    outputType: "string",
+
+    options: {
+      separator: {
+        type: "text",
+        default: " "
+      }
+    },
+
+    run(input, options) {
+      const sep = options.separator ?? " ";
+      return input
+        .split(sep)
+        .map(bin => String.fromCharCode(parseInt(bin, 2)))
+        .join("");
+    }
+  },
   hex_to_rgb: {
     id: "hex_to_rgb",
     name: "HEX → RGB",

@@ -7,7 +7,8 @@
     toBytes,
     toText,
     bytesToHex,
-    bytesToBase64
+    bytesToBase64,
+    formatTime
   } from "./utils";
 
   import Insight from "@/components/Insight.vue";
@@ -43,6 +44,8 @@
   // Bytes (ONLY bytes)
   const inputBytes = ref(new Uint8Array());
   const outputBytes = ref(new Uint8Array());
+
+  const compiledTime = ref(null);
 
   // Computing from inputBytes
   const inputText = computed({
@@ -186,6 +189,9 @@
 
   // Compile Pipeline
   async function compilePipeline() {
+    compiledTime.value = null;
+    const start = performance.now();
+
     const id = ++runId;
     isPipelineError.value = false;
 
@@ -254,6 +260,10 @@
         );
         isPipelineError.value = true;
       }
+    } finally {
+      const completedAt = performance.now() - start;
+      compiledTime.value = formatTime(completedAt);
+      console.log("Compiled In :", completedAt);
     }
   }
 
@@ -285,10 +295,11 @@
   /* ---------------- Utils ---------------- */
 
   // 0 - input / 1 - output
-  function onSaveFile(data, dataType = null) {
+  function onSaveFile(data, dataType = null, filename = null) {
     saveFileData.value = {
       data,
-      dataType
+      dataType,
+      name: filename
     };
   }
   function onSaveFileClose() {
@@ -698,35 +709,47 @@
               <!-- clear text boxes button -->
               <button
                 @click="clearTextBoxes"
-                class="h-full px-2 bg-warning/60 text-warning-content active:bg-warning flex items-center justify-center gap-1 hover:cursor-pointer"
+                class="h-full px-2 bg-error/60 text-error-content active:bg-error flex items-center justify-center gap-1 hover:cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
+                  width="26"
+                  height="26"
                   viewBox="0 0 48 48"
                 >
-                  <g
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="3"
-                  >
-                    <path
-                      d="M5.185 31.954C6.529 26.914 10.638 23 15.854 23c4.895 0 8.164 4.425 8.056 9.32l-.057 2.569a7 7 0 0 0 2.097 5.154l1.106 1.086c1.586 1.557.66 4.224-1.555 4.408c-2.866.237-6.41.463-9.501.463c-3.982 0-7.963-.375-10.45-.666c-1.472-.172-2.558-1.428-2.417-2.902c.32-3.363 1.174-7.188 2.052-10.478"
-                    />
-                    <path
-                      d="M20 24.018c1.68-6.23 3.462-12.468 4.853-18.773c.219-.993-.048-2.01-1-2.365a8 8 0 0 0-.717-.226a8 8 0 0 0-.734-.162c-1.002-.17-1.742.578-2.048 1.547c-1.96 6.191-3.542 12.522-5.213 18.792M45 45H35m7-8H32m7-8H29m-18.951 8.75c-.167 1.5 0 5.2 2 8m5-7.75s0 5 2.951 7.5"
-                    />
-                  </g>
+                  <defs>
+                    <mask id="SVGKuwQcmRM">
+                      <g
+                        fill="none"
+                        stroke="#fff"
+                        stroke-linejoin="round"
+                        stroke-width="4"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          d="M20 5.914h8v8h15v8H5v-8h15z"
+                          clip-rule="evenodd"
+                        />
+                        <path fill="#555555" d="M8 40h32V22H8z" />
+                        <path
+                          stroke-linecap="round"
+                          d="M16 39.898v-5.984m8 5.984v-6m8 6v-5.984M12 40h24"
+                        />
+                      </g>
+                    </mask>
+                  </defs>
+                  <path
+                    fill="currentColor"
+                    d="M0 0h48v48H0z"
+                    mask="url(#SVGKuwQcmRM)"
+                  />
                 </svg>
                 <span class="hidden sm:block">{{ $t("btn.clear") }}</span>
               </button>
               <!-- clear pipeline button -->
               <button
                 @click="clearPipeline"
-                class="h-full px-2 bg-secondary/40 text-secondary-content active:bg-secondary flex items-center justify-center gap-1 hover:cursor-pointer"
+                class="h-full px-2 bg-error/40 text-error-content active:bg-error flex items-center justify-center gap-1 hover:cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -821,22 +844,35 @@
         </div>
       </div>
     </div>
-    <!-- kittychef quick tools -->
+    <!-- kittychef Status Bar -->
     <div
       v-if="fullScreenLevel < 2"
-      class="p-1 px-2 bg-primary/60 flex gap-1 text-xs text-base-content/70 font-heading"
+      class="p-1 px-2 bg-primary/60 flex items-center justify-between gap-1 text-xs text-base-content/70 font-heading"
     >
-      <span class="px-2 py-0.5 rounded bg-primary/60 text-primary-content">
-        {{ $t("insight.live") }}
-        <strong>{{ liveUpdate ? "Yes" : "No" }}</strong>
-      </span>
-      <span
-        v-if="recepiePipeline.length"
-        class="px-2 py-0.5 rounded bg-primary/60 text-primary-content"
-      >
-        {{ $t("insight.recepies") }}
-        <strong>{{ recepiePipeline.length }}</strong>
-      </span>
+      <div class="flex items-center gap-1">
+        <span class="px-2 py-0.5 rounded bg-primary/60 text-primary-content">
+          {{ $t("insight.live") }}
+          <strong>{{ liveUpdate ? "Yes" : "No" }}</strong>
+        </span>
+        <span
+          v-if="recepiePipeline.length"
+          class="px-2 py-0.5 rounded bg-primary/60 text-primary-content"
+        >
+          {{ $t("insight.recepies") }}
+          <strong>{{ recepiePipeline.length }}</strong>
+        </span>
+      </div>
+
+      <Transition name="fade-scale">
+        <div
+          v-if="compiledTime && inputBytes.length > 0"
+          class="text-xs text-primary-content/60"
+        >
+          Compiled in
+
+          <strong>{{ compiledTime }}</strong> ms
+        </div>
+      </Transition>
     </div>
 
     <!-- Recepie Options overlay fixed -->
@@ -930,7 +966,7 @@
     >
       <!-- SIDEBAR -->
       <Transition name="slide-right">
-        <div v-show="showSideBar" class="relative h-full w-3/4 sm:w-1/3 glass">
+        <div v-show="showSideBar" class="relative h-full w-3/4 sm:w-1/2 glass">
           <Sidebar />
         </div>
       </Transition>

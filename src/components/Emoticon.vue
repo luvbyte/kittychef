@@ -29,7 +29,7 @@
 
   function onHover() {
     isHovering = true;
-    emoticon.value = "😿";
+    emoticon.value = "😼";
   }
 
   function onLeave() {

@@ -1,3 +1,9 @@
+export function formatTime(ms) {
+  if (ms < 1) return ms.toFixed(2)
+  if (ms < 1000) return ms.toFixed(1)
+  return (ms / 1000).toFixed(2)
+}
+
 export function toBytes(text, encoding = "utf-8") {
   return new TextEncoder(encoding).encode(text);
 }
