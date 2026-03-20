@@ -22,64 +22,72 @@ export default {
         const ip = input?.trim();
 
         const url = ip
-          ? `http://ip-api.com/json/${ip}`
-          : `http://ip-api.com/json`;
+          ? `https://ipapi.co/${ip}/json/`
+          : `https://ipapi.co/json/`;
 
-        const response = await fetch(url);
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0",
+            Accept: "application/json"
+          }
+        });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} ${res.statusText}`);
         }
 
-        const data = await response.json();
+        const data = await res.json();
 
-        if (data.status !== "success") {
-          throw new Error(data.message || "Failed to fetch IP details");
+        if (data.error) {
+          throw new Error(data.reason || "Failed to fetch IP details");
         }
 
-        const result = {
-          ip: data.query,
-          country: data.country,
-          region: data.regionName,
-          city: data.city,
-          zip: data.zip,
-          lat: data.lat,
-          lon: data.lon,
-          timezone: data.timezone,
-          isp: data.isp,
-          org: data.org,
-          as: data.as
-        };
-
-        // Return JSON if requested
+        // Return full JSON if requested
         if (json) {
-          return JSON.stringify(result);
+          return JSON.stringify(data, null);
         }
 
-        // Else return nicely formatted text
+        // Pretty output
         return `
-
 🌐 IP Details
 ━━━━━━━━━━━━━━
-IP Address : ${result.ip}
-Country    : ${result.country}
-Region     : ${result.region}
-City       : ${result.city}
-ZIP Code   : ${result.zip}
+IP Address : ${data.ip}
+Version    : ${data.version}
 
-📍 Location
+🌍 Geography
 ━━━━━━━━━━━━━━
-Latitude   : ${result.lat}
-Longitude  : ${result.lon}
-Timezone   : ${result.timezone}
+Country    : ${data.country_name} (${data.country_code})
+Region     : ${data.region}
+City       : ${data.city}
+Postal     : ${data.postal}
+Continent  : ${data.continent_code}
+
+📍 Coordinates
+━━━━━━━━━━━━━━
+Latitude   : ${data.latitude}
+Longitude  : ${data.longitude}
+
+🕒 Timezone
+━━━━━━━━━━━━━━
+Timezone   : ${data.timezone}
+UTC Offset : ${data.utc_offset}
+
+💰 Currency
+━━━━━━━━━━━━━━
+Currency   : ${data.currency} (${data.currency_name})
+
+📞 Extra
+━━━━━━━━━━━━━━
+Calling Code : ${data.country_calling_code}
+Languages    : ${data.languages}
 
 🏢 Network
 ━━━━━━━━━━━━━━
-ISP        : ${result.isp}
-Org        : ${result.org}
-ASN        : ${result.as}
+ISP / Org  : ${data.org}
+ASN        : ${data.asn}
 `.trim();
       } catch (err) {
+        console.error("IP Fetch Error:", err);
         throw new Error(`IP Details Finder Error: ${err.message}`);
       }
     }
