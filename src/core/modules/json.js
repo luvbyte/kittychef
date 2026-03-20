@@ -1,4 +1,4 @@
-// JSON
+// Json
 
 export default {
   json_pretty: {
@@ -35,7 +35,6 @@ export default {
       }
     }
   },
-
   json_minify: {
     id: "json_minify",
     name: "JSON Minify",
@@ -62,7 +61,6 @@ export default {
       }
     }
   },
-
   json_filter: {
     id: "json_filter",
     name: "JSON Filter",

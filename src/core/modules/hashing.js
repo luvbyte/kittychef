@@ -29,7 +29,6 @@ export default {
       return options?.uppercase ? hex.toUpperCase() : hex;
     }
   },
-
   sha1: {
     id: "sha1",
     name: "SHA-1",
@@ -59,7 +58,6 @@ export default {
       return options.uppercase ? hex.toUpperCase() : hex;
     }
   },
-
   sha512: {
     id: "sha512",
     name: "SHA-512",
@@ -88,7 +86,6 @@ export default {
       return options.uppercase ? hex.toUpperCase() : hex;
     }
   },
-
   md5: {
     id: "md5",
     name: "MD5",

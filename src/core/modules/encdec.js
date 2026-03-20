@@ -1,3 +1,5 @@
+// Encoding & Decoding
+
 export default {
   base64_encode: {
     id: "base64_encode",
@@ -7,8 +9,25 @@ export default {
     inputType: "byteArray",
     outputType: "string",
 
-    async run(input) {
-      return btoa(String.fromCharCode(...input));
+    options: {
+      urlsafe: {
+        label: "URL Safe",
+        type: "checkbox",
+        default: false
+      }
+    },
+
+    async run(input, { urlsafe }) {
+      let base64 = btoa(String.fromCharCode(...input));
+
+      if (urlsafe) {
+        return base64
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, ""); // remove padding
+      }
+
+      return base64;
     }
   },
   base64_decode: {
@@ -19,9 +38,28 @@ export default {
     inputType: "string",
     outputType: "byteArray",
 
-    async run(input) {
+    options: {
+      urlsafe: {
+        label: "URL Safe",
+        type: "checkbox",
+        default: false
+      }
+    },
+
+    async run(input, { urlsafe }) {
+      let base64 = input;
+
+      if (urlsafe) {
+        base64 = base64.replace(/-/g, "+").replace(/_/g, "/");
+
+        // restore padding
+        while (base64.length % 4 !== 0) {
+          base64 += "=";
+        }
+      }
+
       return new Uint8Array(
-        atob(input)
+        atob(base64)
           .split("")
           .map(c => c.charCodeAt(0))
       );

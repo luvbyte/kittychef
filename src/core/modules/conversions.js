@@ -1,3 +1,5 @@
+// Conversion
+
 export default {
   textToBinary: {
     id: "textToBinary",
@@ -37,6 +39,7 @@ export default {
     options: {
       separator: {
         type: "text",
+        placeholder: "Separator",
         default: " "
       }
     },
@@ -175,6 +178,81 @@ export default {
       return JSON.stringify(json, null, 2);
     }
   },
+  json_to_csv: {
+    id: "json_to_csv",
+    name: "JSON → CSV",
+    category: "Conversion",
+    description: "Converts JSON array string into CSV text.",
+    inputType: "string",
+    outputType: "string",
+
+    async run(input) {
+      let data;
+
+      // Parse input safely
+      try {
+        data = JSON.parse(String(input));
+
+        // Handle double-encoded JSON
+        if (typeof data === "string") {
+          data = JSON.parse(data);
+        }
+      } catch {
+        throw new Error("Invalid JSON input.");
+      }
+
+      // Normalize to array
+      if (!Array.isArray(data)) {
+        if (Array.isArray(data.data)) {
+          data = data.data; // unwrap { data: [...] }
+        } else if (typeof data === "object" && data !== null) {
+          data = [data]; // single object → array
+        } else {
+          throw new Error("Input must be a JSON array or object.");
+        }
+      }
+
+      if (data.length === 0) {
+        throw new Error("Array is empty.");
+      }
+
+      // Collect all unique headers
+      const headers = Array.from(
+        data.reduce((set, obj) => {
+          if (obj && typeof obj === "object") {
+            Object.keys(obj).forEach(k => set.add(k));
+          }
+          return set;
+        }, new Set())
+      );
+
+      // Escape CSV values
+      const escapeCSV = value => {
+        if (value === null || value === undefined) return "";
+        const str = String(value);
+
+        if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+
+        return str;
+      };
+
+      // Build CSV
+      const csvRows = [];
+
+      // Header row
+      csvRows.push(headers.join(","));
+
+      // Data rows
+      for (const obj of data) {
+        const row = headers.map(header => escapeCSV(obj?.[header]));
+        csvRows.push(row.join(","));
+      }
+
+      return csvRows.join("\n");
+    }
+  },
   binary_to_hex: {
     id: "binary_to_hex",
     name: "Binary → HEX",
@@ -290,23 +368,21 @@ export default {
     }
   },
   decimal_to_hex: {
-  id: "decimal_to_hex",
-  name: "Decimal → HEX",
-  category: "Conversion",
-  description: "Converts decimal string to hexadecimal string.",
-  inputType: "string",
-  outputType: "string",
+    id: "decimal_to_hex",
+    name: "Decimal → HEX",
+    category: "Conversion",
+    description: "Converts decimal string to hexadecimal string.",
+    inputType: "string",
+    outputType: "string",
 
-  async run(input) {
-    const num = String(input).trim();
+    async run(input) {
+      const num = String(input).trim();
 
-    if (!/^\d+$/.test(num)) {
-      throw new Error("Invalid decimal format.");
+      if (!/^\d+$/.test(num)) {
+        throw new Error("Invalid decimal format.");
+      }
+
+      return parseInt(num, 10).toString(16).toUpperCase();
     }
-
-    return parseInt(num, 10)
-      .toString(16)
-      .toUpperCase();
   }
-}
 };

@@ -15,7 +15,6 @@ export default {
       return input.split("").reverse().join("");
     }
   },
-
   uppercase: {
     id: "uppercase",
     name: "Uppercase",
@@ -61,7 +60,6 @@ export default {
       }
     }
   },
-
   lowercase: {
     id: "lowercase",
     name: "Lowercase",
@@ -76,7 +74,6 @@ export default {
       return input.toLowerCase();
     }
   },
-
   trimWhitespace: {
     id: "trimWhitespace",
     name: "Trim Whitespace",
@@ -108,7 +105,6 @@ export default {
       }
     }
   },
-
   replaceText: {
     id: "replaceText",
     name: "Replace Text",
@@ -139,7 +135,6 @@ export default {
       return input.split(options.find).join(options.replace);
     }
   },
-
   regex_extract: {
     id: "regex_extract",
     name: "Regex Extract",
@@ -157,11 +152,42 @@ export default {
       return [...input.matchAll(regex)].map(m => m[0]);
     }
   },
-
   remove_duplicate_lines: {
     id: "remove_duplicate_lines",
     name: "Remove Duplicate Lines",
     category: "Text",
+    inputType: "string",
+    outputType: "string",
+
+    async run(input) {
+      return [...new Set(input.split("\n"))].join("\n");
+    }
+  },
+  truncate: {
+    id: "truncate",
+    name: "Truncate Text",
+    category: "Text",
+    description: "Shorten text to a specified length",
+    inputType: "string",
+    outputType: "string",
+
+    options: {
+      length: {
+        type: "number",
+        default: 100
+      }
+    },
+
+    async run(input, { length = 100 } = {}) {
+      return input.length > length ? input.slice(0, length) + "..." : input;
+    }
+  },
+  unique_lines: {
+    id: "unique_lines",
+    name: "Unique Lines",
+    category: "Text",
+    description: "Remove duplicate lines from text",
+
     inputType: "string",
     outputType: "string",
 

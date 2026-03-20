@@ -21,9 +21,9 @@
 
   // Daisyui themes
   const themes = [
-    "caramellatte",
-    "coffee",
     "catppuccino",
+    "coffee",
+    "caramellatte",
     "dim",
     "valentine",
     "dracula",
@@ -297,7 +297,7 @@
  （„• ֊ •„)♡
 ┏ • UU • - • - • - • - • - • - • ღ❦ღ┓</pre
     >
-    <div class="text-sm flex items-center gap-1 justify-center my-4">
+    <div class="divider m-0 text-sm flex items-center gap-1 justify-center my-4">
       <span class="badge badge-sm badge-primary font-semibold font-heading"
         >KittyChef</span
       >

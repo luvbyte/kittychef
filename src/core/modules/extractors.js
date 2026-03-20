@@ -40,7 +40,6 @@ export default {
       return formatResults(results);
     }
   },
-
   extract_urls: {
     id: "extract_urls",
     name: "Extract URLs",
@@ -55,7 +54,6 @@ export default {
       );
     }
   },
-
   extract_ipv4: {
     id: "extract_ipv4",
     name: "Extract IPv4",
@@ -70,7 +68,6 @@ export default {
       );
     }
   },
-
   extract_mac: {
     id: "extract_mac",
     name: "Extract MAC Address",
@@ -85,7 +82,6 @@ export default {
       );
     }
   },
-
   extract_hashes: {
     id: "extract_hashes",
     name: "Extract Hashes",
@@ -103,7 +99,6 @@ export default {
       return formatResults(results);
     }
   },
-
   extract_jwt: {
     id: "extract_jwt",
     name: "Extract JWT",
@@ -122,7 +117,6 @@ export default {
       );
     }
   },
-
   extract_base64: {
     id: "extract_base64",
     name: "Extract Base64",
@@ -141,7 +135,6 @@ export default {
       );
     }
   },
-
   extract_strings: {
     id: "extract_strings",
     name: "Extract ASCII Strings",

@@ -1,4 +1,89 @@
 export default {
+  ip_details_finder: {
+    id: "ip_details_finder",
+    name: "IP Details Finder",
+    category: "Recon",
+
+    description: "Fetches IP geolocation and ISP details using ip-api.com",
+
+    inputType: "string", // optional IP string
+    outputType: "string",
+
+    options: {
+      json: {
+        type: "checkbox",
+        label: "Json type",
+        default: false
+      }
+    },
+
+    async run(input, { json }) {
+      try {
+        const ip = input?.trim();
+
+        const url = ip
+          ? `http://ip-api.com/json/${ip}`
+          : `http://ip-api.com/json`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.status !== "success") {
+          throw new Error(data.message || "Failed to fetch IP details");
+        }
+
+        const result = {
+          ip: data.query,
+          country: data.country,
+          region: data.regionName,
+          city: data.city,
+          zip: data.zip,
+          lat: data.lat,
+          lon: data.lon,
+          timezone: data.timezone,
+          isp: data.isp,
+          org: data.org,
+          as: data.as
+        };
+
+        // Return JSON if requested
+        if (json) {
+          return JSON.stringify(result);
+        }
+
+        // Else return nicely formatted text
+        return `
+
+🌐 IP Details
+━━━━━━━━━━━━━━
+IP Address : ${result.ip}
+Country    : ${result.country}
+Region     : ${result.region}
+City       : ${result.city}
+ZIP Code   : ${result.zip}
+
+📍 Location
+━━━━━━━━━━━━━━
+Latitude   : ${result.lat}
+Longitude  : ${result.lon}
+Timezone   : ${result.timezone}
+
+🏢 Network
+━━━━━━━━━━━━━━
+ISP        : ${result.isp}
+Org        : ${result.org}
+ASN        : ${result.as}
+`.trim();
+      } catch (err) {
+        throw new Error(`IP Details Finder Error: ${err.message}`);
+      }
+    }
+  },
   js_recon_extract: {
     id: "js_recon_extract",
     name: "JS Recon Extractor",

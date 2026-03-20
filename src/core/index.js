@@ -49,7 +49,6 @@ export const dataConversions = {
   }
 };
 
-// TODO: Add strict chceking of dataType
 export class Data {
   // Starting type
   constructor(input, inputType) {

@@ -1,3 +1,5 @@
+// Decryption
+
 export default {
   aes_decrypt: {
     id: "aes_decrypt",
@@ -140,6 +142,102 @@ export default {
       }
 
       return output;
+    }
+  },
+  vigenere_decrypt: {
+    id: "vigenere_decrypt",
+    name: "Vigenère Decrypt",
+    category: "Decryption",
+    description: "Decrypts Vigenère cipher using a keyword.",
+    inputType: "byteArray",
+    outputType: "byteArray",
+
+    options: {
+      key: { type: "text", label: "Key", required: true }
+    },
+
+    async run(input, { key }) {
+      const output = new Uint8Array(input.length);
+      const keyBytes = new TextEncoder().encode(key);
+
+      let j = 0;
+
+      for (let i = 0; i < input.length; i++) {
+        let c = input[i];
+        const k = keyBytes[j % keyBytes.length];
+
+        let shift;
+
+        // Normalize key char to 0–25
+        if (k >= 65 && k <= 90) shift = k - 65;
+        else if (k >= 97 && k <= 122) shift = k - 97;
+        else shift = 0;
+
+        if (c >= 65 && c <= 90) {
+          c = ((c - 65 - shift + 26) % 26) + 65;
+          j++;
+        } else if (c >= 97 && c <= 122) {
+          c = ((c - 97 - shift + 26) % 26) + 97;
+          j++;
+        }
+
+        output[i] = c;
+      }
+
+      return output;
+    }
+  },
+  aes_ctr_decrypt: {
+    id: "aes_ctr_decrypt",
+    name: "AES Decrypt (CTR)",
+    category: "Decryption",
+    description: "Decrypts AES-CTR. Input = salt + counter + ciphertext.",
+    inputType: "byteArray",
+    outputType: "byteArray",
+
+    strictType: true,
+
+    options: {
+      password: { type: "text", label: "Password", required: true }
+    },
+
+    async run(input, { password }) {
+      const salt = input.slice(0, 16);
+      const counter = input.slice(16, 32);
+      const data = input.slice(32);
+
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(password),
+        "PBKDF2",
+        false,
+        ["deriveKey"]
+      );
+
+      const key = await crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt,
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-CTR", length: 256 },
+        false,
+        ["decrypt"]
+      );
+
+      const decrypted = await crypto.subtle.decrypt(
+        {
+          name: "AES-CTR",
+          counter,
+          length: 64
+        },
+        key,
+        data
+      );
+
+      return new Uint8Array(decrypted);
     }
   }
 };

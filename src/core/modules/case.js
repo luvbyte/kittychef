@@ -1,14 +1,18 @@
+// Case
+
 function splitWords(input) {
-  return input
-    // handle camelCase → camel Case
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    // handle kebab-case & snake_case
-    .replace(/[-_]/g, " ")
-    // remove extra junk
-    .replace(/[^\w\s]/g, "")
-    .toLowerCase()
-    .trim()
-    .split(/\s+/);
+  return (
+    input
+      // handle camelCase → camel Case
+      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+      // handle kebab-case & snake_case
+      .replace(/[-_]/g, " ")
+      // remove extra junk
+      .replace(/[^\w\s]/g, "")
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+  );
 }
 
 export default {
@@ -27,14 +31,11 @@ export default {
 
       return words
         .map((word, i) =>
-          i === 0
-            ? word
-            : word.charAt(0).toUpperCase() + word.slice(1)
+          i === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
         )
         .join("");
     }
   },
-
   pascalCase: {
     id: "pascalCase",
     name: "PascalCase",
@@ -47,13 +48,10 @@ export default {
 
     run(input) {
       return splitWords(input)
-        .map(
-          word => word.charAt(0).toUpperCase() + word.slice(1)
-        )
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join("");
     }
   },
-
   snake_case: {
     id: "snake_case",
     name: "snake_case",
@@ -68,7 +66,6 @@ export default {
       return splitWords(input).join("_");
     }
   },
-
   kebab_case: {
     id: "kebab_case",
     name: "kebab-case",
@@ -83,7 +80,6 @@ export default {
       return splitWords(input).join("-");
     }
   },
-
   constant_case: {
     id: "constant_case",
     name: "CONSTANT_CASE",
@@ -95,12 +91,9 @@ export default {
     outputType: "string",
 
     run(input) {
-      return splitWords(input)
-        .join("_")
-        .toUpperCase();
+      return splitWords(input).join("_").toUpperCase();
     }
   },
-
   titleCase: {
     id: "titleCase",
     name: "Title Case",
@@ -113,20 +106,16 @@ export default {
 
     run(input) {
       return splitWords(input)
-        .map(
-          word => word.charAt(0).toUpperCase() + word.slice(1)
-        )
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
     }
   },
-
   sentenceCase: {
     id: "sentenceCase",
     name: "Sentence case",
     category: "Case",
 
-    description:
-      "Capitalizes only the first letter of the sentence.",
+    description: "Capitalizes only the first letter of the sentence.",
 
     inputType: "string",
     outputType: "string",
@@ -136,7 +125,6 @@ export default {
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
   },
-
   alternatingCase: {
     id: "alternatingCase",
     name: "aLtErNaTiNg CaSe",
@@ -151,9 +139,7 @@ export default {
       return input
         .split("")
         .map((char, i) =>
-          i % 2 === 0
-            ? char.toLowerCase()
-            : char.toUpperCase()
+          i % 2 === 0 ? char.toLowerCase() : char.toUpperCase()
         )
         .join("");
     }

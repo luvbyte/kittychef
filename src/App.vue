@@ -16,9 +16,9 @@
   import Emoticon from "@/components/Emoticon.vue";
   import RecepieBox from "@/components/RecepieBox.vue";
   import TextAreaUtils from "@/components/TextAreaUtils.vue";
-  import RecepieOptions from "@/components/RecepieOptions.vue";
   import RecepiePipelineTree from "@/components/RecepiePipelineTree.vue";
   import SaveFile from "@/components/SaveFile.vue";
+  import ModuleOptionsPopup from "@/components/ModuleOptionsPopup.vue";
 
   import { Data } from "@/core";
   import modules from "@/core/modules";
@@ -45,6 +45,7 @@
   const inputBytes = ref(new Uint8Array());
   const outputBytes = ref(new Uint8Array());
 
+  // Pipeline Compiled Time in ms
   const compiledTime = ref(null);
 
   // Computing from inputBytes
@@ -79,7 +80,13 @@
   const recepiePipeline = ref([]);
   const selectedModule = ref(null);
   const selectedModuleIndex = ref(null);
+
+  const lastModuleOptions = ref(null);
+
+  const isCompiling = ref(false);
   const isPipelineError = ref(false);
+  const errorModuleIndex = ref(null);
+  const errorModuleMessage = ref(null);
 
   const modulesChipsRef = ref(null);
 
@@ -126,6 +133,7 @@
     return clone;
   }
 
+  // Toggle live compile pipeline
   function toggleLiveUpdate() {
     liveUpdate.value = !liveUpdate.value;
     compilePipeline();
@@ -137,7 +145,6 @@
   });
 
   const grouped = groupModulesByCategory(modules);
-
   /* ---------------- MODULE ACTIONS ---------------- */
 
   function selectModule(m) {
@@ -148,7 +155,8 @@
   function clearPipeline() {
     recepiePipeline.value.length = 0;
     selectedModule.value = null;
-    isPipelineError.value = false;
+
+    resetCompileStates();
   }
 
   function clearTextBoxes() {
@@ -187,13 +195,26 @@
     }
   }
 
+  // Reset vaalues used in compile
+  function resetCompileStates() {
+    compiledTime.value = null;
+    lastModuleOptions.value = null;
+
+    isCompiling.value = false;
+    isPipelineError.value = false;
+    errorModuleIndex.value = null;
+    errorModuleMessage.value = "";
+  }
+
   // Compile Pipeline
   async function compilePipeline() {
-    compiledTime.value = null;
+    // Reset values
+    resetCompileStates();
+
     const start = performance.now();
 
+    isCompiling.value = true;
     const id = ++runId;
-    isPipelineError.value = false;
 
     // Explicitly declare input type
     let data = new Data(inputBytes.value, "byteArray");
@@ -240,11 +261,21 @@
 
           // Convert + store correctly
           data.setData(result, outputType);
+
+          // Used to filter out options
+          lastModuleOptions.value = {
+            inputType,
+            outputType,
+            strictType: mod.strictType || false
+          };
         } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+
+          errorModuleIndex.value = index;
+          errorModuleMessage.value = errorMessage;
+
           throw new Error(
-            `Error in module ( ${index + 1} ) ${mod.name}: ${
-              err instanceof Error ? err.message : String(err)
-            }`
+            `Error in module ( ${index + 1} ) ${mod.name}: ${errorMessage}`
           );
         }
       }
@@ -254,16 +285,16 @@
         outputBytes.value = data.getData("byteArray");
       }
     } catch (err) {
-      if (id === runId) {
-        outputBytes.value = toBytes(
-          err instanceof Error ? err.message : String(err)
-        );
-        isPipelineError.value = true;
-      }
+      if (id !== runId) return; // avoid race condition
+
+      outputBytes.value = toBytes(
+        err instanceof Error ? err.message : String(err)
+      );
+
+      isPipelineError.value = true;
     } finally {
-      const completedAt = performance.now() - start;
-      compiledTime.value = formatTime(completedAt);
-      console.log("Compiled In :", completedAt);
+      compiledTime.value = performance.now() - start;
+      isCompiling.value = false;
     }
   }
 
@@ -293,8 +324,6 @@
     }
   }
   /* ---------------- Utils ---------------- */
-
-  // 0 - input / 1 - output
   function onSaveFile(data, dataType = null, filename = null) {
     saveFileData.value = {
       data,
@@ -307,9 +336,9 @@
   }
 </script>
 <template>
+  <!-- Main / Root Element -->
   <div
-    id="main"
-    data-theme="light"
+    id="kittychef-main"
     class="h-dvh flex flex-col overflow-hidden font-body transition-colors duration-600"
   >
     <!-- Header / Navbar -->
@@ -318,7 +347,7 @@
       class="glass bg-primary text-primary-content p-2 py-3 flex justify-between items-center font-heading shadow-sm"
     >
       <button @click="showSideBar = true" class="flex items-center gap-1">
-        <!-- cat icon -->
+        <!-- Cat Icon -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -347,7 +376,7 @@
       </button>
 
       <div class="flex gap-1 items-center">
-        <!-- Browser fullscreen -->
+        <!-- Browser Fullscreen -->
         <button @click="toggleFullScreen" class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -361,7 +390,7 @@
             />
           </svg>
         </button>
-        <!-- Theme -->
+        <!-- Theme Button -->
         <button
           class="flex items-center gap-1 hover:cursor-pointer"
           @click="showSideBar = true"
@@ -455,6 +484,7 @@
             </svg>
           </button>
         </div>
+        <!-- Input Text Area Utils -->
         <TextAreaUtils
           :data="inputBytes"
           @update:data="val => (inputBytes = val)"
@@ -491,13 +521,6 @@
             />
           </div>
         </div>
-
-        <div v-if="false" class="relative">
-          <div
-            v-if="showInputBox && showOutputBox"
-            class="absolute top-1/2 -translate-y-1/2 h-[90%] divider divider-horizontal m-0"
-          ></div>
-        </div>
         <!-- Output -->
         <div v-if="showOutputBox" class="flex-1 flex flex-col">
           <textarea
@@ -518,7 +541,7 @@
               }
             ]"
           ></textarea>
-          <!-- output quick insight -->
+          <!-- Output Quick Insight -->
           <div
             class="p-1 bg-base-200 text-base-content flex gap-2 text-xs text-base-content/70"
           >
@@ -830,11 +853,13 @@
               <div
                 v-for="(m, index) in recepiePipeline"
                 @click="showRecepieOptions(m)"
-                class="px-2 glass rounded text-xs p-0.5 flex items-center justify-center border shadow-lg hover:cursor-pointer py-1"
+                class="px-2 glass rounded text-xs p-0.5 flex items-center justify-center shadow-lg hover:cursor-pointer py-1"
                 :class="
-                  index % 2 === 0
-                    ? 'bg-primary text-primary-content'
-                    : 'bg-secondary text-secondary-content'
+                  errorModuleIndex === index
+                    ? 'underline bg-error text-error-content'
+                    : index % 2 === 0
+                      ? 'bg-primary text-primary-content'
+                      : 'bg-secondary text-secondary-content'
                 "
               >
                 {{ m.name }}
@@ -865,76 +890,48 @@
 
       <Transition name="fade-scale">
         <div
-          v-if="compiledTime && inputBytes.length > 0"
+          v-if="
+            isCompiling || (compiledTime !== null && recepiePipeline.length > 0)
+          "
           class="text-xs text-primary-content/60"
         >
-          Compiled in
-
-          <strong>{{ compiledTime }}</strong> ms
+          <div v-if="isCompiling">Cooking...</div>
+          <div v-else>
+            Cooked in
+            <strong :class="{ 'text-error': isPipelineError }">{{
+              formatTime(compiledTime)
+            }}</strong>
+            seconds
+          </div>
         </div>
       </Transition>
     </div>
 
     <!-- Recepie Options overlay fixed -->
     <Transition name="fade-scale">
-      <div
+      <ModuleOptionsPopup
         v-if="selectedModule"
-        class="fixed top-0 left-0 w-full h-full flex flex-col items-center px-8 justify-center bg-black/60"
-        @click.self="selectedModule = null"
-      >
-        <div
-          class="w-full h-[25rem] sm:h-[50%] sm:w-[50%] rstyle bg-base-100 shadow-lg flex flex-col overflow-hidden"
-        >
-          <!-- HEAD -->
-          <div
-            class="flex items-center justify-between p-2 py-3 bg-primary text-primary-content glass"
-          >
-            <h1 class="font-bold text-lg">{{ selectedModule.name }} Options</h1>
-
-            <!-- close btn -->
-            <button @click="selectedModule = null" class="opacity-80">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div class="p-2 opacity-60 text-center text-xs">
-            {{ selectedModule.description }}
-          </div>
-
-          <div v-if="!hasOptions" class="p-2 text-center opacity-80">
-            No options required
-          </div>
-          <!-- Options -->
-          <RecepieOptions
-            :module="selectedModule"
-            @update="
-              data =>
-                (recepiePipeline[selectedModuleIndex].options[data.key].value =
-                  data.value)
-            "
-          />
-        </div>
-      </div>
+        :selectedModule="selectedModule"
+        :hasOptions="hasOptions"
+        @close="selectedModule = null"
+        @update="
+          data =>
+            (recepiePipeline[selectedModuleIndex].options[data.key].value =
+              data.value)
+        "
+      />
     </Transition>
 
     <!-- recepie pipeline tree ( development ) -->
     <Transition name="fade-scale">
       <RecepiePipelineTree
-        v-if="showRecepiePipelineTree"
-        :recepiePipeline
-        :clearPipeline
+        v-show="showRecepiePipelineTree"
+        :recepiePipeline="recepiePipeline"
+        :clearPipeline="clearPipeline"
+        :errorIndex="errorModuleIndex"
+        :errorMessage="errorModuleMessage"
         :addRecepie="() => (showRecepieBox = true)"
-        :onSaveFile="onSaveFile"
+        @saveFile="onSaveFile"
         @close="() => (showRecepiePipelineTree = false)"
       />
     </Transition>
@@ -942,8 +939,9 @@
     <!-- RecepieBox Modal -->
     <Transition name="fade-scale">
       <RecepieBox
-        v-if="showRecepieBox"
-        :grouped
+        v-show="showRecepieBox"
+        :grouped="grouped"
+        :lastModuleOptions="lastModuleOptions"
         @select="selectModule"
         @close="() => (showRecepieBox = false)"
       />

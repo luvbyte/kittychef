@@ -8,12 +8,13 @@
 
   const props = defineProps<{
     recepiePipeline: any[];
+    errorIndex: any;
+    errorMessage: any;
     clearPipeline: () => void;
     addRecepie: () => void;
-    onSaveFile: () => void;
   }>();
 
-  const emit = defineEmits(["close"]);
+  const emit = defineEmits(["close", "saveFile"]);
 
   function close() {
     emit("close");
@@ -21,20 +22,29 @@
 
   const collapsedPipelines = ref([]);
 
-  function toggleOptions(mod: any, i) {
-    // skip if module has no options and no description
-    if (Object.keys(mod.options).length <= 0 && mod.description.length <= 0)
-      return;
+  function getKey(mod: any, i: number) {
+    return `${mod.id}-${i}`;
+  }
 
-    const key = mod.id + i;
+  function toggleOptions(mod: any, i: number) {
+    if (Object.keys(mod.options).length === 0 && !mod.description) return;
+
+    const key = getKey(mod, i);
 
     const index = collapsedPipelines.value.indexOf(key);
-    // if not exists
+
     if (index === -1) {
       collapsedPipelines.value.push(key);
     } else {
       collapsedPipelines.value.splice(index, 1);
     }
+  }
+
+  function toggleCollapse() {
+    const allKeys = props.recepiePipeline.map((mod, i) => getKey(mod, i));
+
+    collapsedPipelines.value =
+      collapsedPipelines.value.length === allKeys.length ? [] : allKeys;
   }
 
   // Clear
@@ -55,15 +65,16 @@
     [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
   }
 
-  function removeItem(i: number, mod) {
+  function removeItem(i: number, mod: any) {
+    const key = getKey(mod, i);
+
     props.recepiePipeline.splice(i, 1);
 
-    const index = collapsedPipelines.value.indexOf(mod.id);
+    const index = collapsedPipelines.value.indexOf(key);
     if (index !== -1) {
       collapsedPipelines.value.splice(index, 1);
     }
   }
-
   const hasRecepies = computed(() => props.recepiePipeline.length > 0);
 
   function exportPipeline() {
@@ -95,7 +106,7 @@
     const encoder = new TextEncoder();
     const bytes = encoder.encode(json);
 
-    props.onSaveFile(bytes, "application/json", "recepies");
+    emit("saveFile", bytes, "application/json", "recepies");
   }
 
   // IMPORT (REBUILD FROM modules OBJECT)
@@ -201,6 +212,23 @@
 
     <div class="flex justify-between gap-1 px-2 text-sm font-medium">
       <div class="flex gap-1 items-center">
+        <!-- Collapse -->
+        <button
+          @click="toggleCollapse"
+          class="px-3 py-1 bg-info/80 text-info-content rounded shadow-lg active:bg-info transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 1024 1024"
+          >
+            <path
+              fill="currentColor"
+              d="M952 612c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H298c-14.2-35.2-48.7-60-89-60c-53 0-96 43-96 96s43 96 96 96c40.3 0 74.8-24.8 89-60h150.3v152c0 55.2 44.8 100 100 100H952c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H548.3c-15.5 0-28-12.5-28-28V612zM451.7 313.7l172.5 136.2c6.3 5.1 15.8.5 15.8-7.7V344h264c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8H640v-98.2c0-8.1-9.4-12.8-15.8-7.7L451.7 298.3c-4.9 3.9-4.9 11.5 0 15.4"
+            />
+          </svg>
+        </button>
         <!-- Clear -->
         <button
           @click="clear"
@@ -302,6 +330,7 @@
         :key="mod.id + i"
         @click="toggleOptions(mod, i)"
         class="mb-2 p-1 rounded-xl bg-base-200 text-base-content shadow-sm"
+        :class="{ 'border-2 border-error': errorIndex === i }"
       >
         <!-- Module Row -->
         <div class="flex justify-between items-center px-2 py-1">
@@ -379,7 +408,7 @@
               <div
                 class="transition-transform duration-200"
                 :class="
-                  collapsedPipelines.includes(mod.id + i) ? 'rotate-90' : ''
+                  collapsedPipelines.includes(getKey(mod, i)) ? 'rotate-90' : ''
                 "
               >
                 <svg
@@ -401,7 +430,24 @@
         </div>
 
         <Transition name="fade-scale">
-          <div v-if="collapsedPipelines.includes(mod.id + i)" @click.stop>
+          <div v-if="collapsedPipelines.includes(getKey(mod, i))" @click.stop>
+            <div class="p-1 flex gap-1 justify-end items-center text-xs">
+              <div
+                v-if="mod.strictType"
+                class="bg-base-100 text-base-content opacity-80 border top-1 right-1 text-[10px] px-1 rounded"
+              >
+                <strong>Strict</strong>
+              </div>
+              <!-- Disabled message -->
+              <div
+                class="bg-base-100 text-base-content opacity-80 border top-1 right-1 text-[10px] px-1 rounded"
+              >
+                <div class="flex items-center gap-0.5">
+                  <strong>{{ mod.inputType }}</strong> ->
+                  <strong>{{ mod.outputType }}</strong>
+                </div>
+              </div>
+            </div>
             <!-- Description -->
             <div class="text-center text-sm text-xs p-2 opacity-80">
               {{ mod.description }}
@@ -413,6 +459,13 @@
             />
           </div>
         </Transition>
+
+        <div
+          v-if="errorIndex === i"
+          class="py-1 text-center text-error text-sm"
+        >
+          {{ errorMessage }}
+        </div>
       </div>
     </div>
   </div>

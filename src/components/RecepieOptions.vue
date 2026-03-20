@@ -64,6 +64,22 @@
         <span class="text-sm font-medium">{{ opt.label }}</span>
       </label>
 
+      <!-- FILE INPUT -->
+      <input
+        v-if="opt.type === 'file'"
+        type="file"
+        :multiple="opt.multiple"
+        :accept="opt.accept"
+        class="file-input file-input-sm file-input-bordered w-full focus:outline-none"
+        @change="
+          e =>
+            emit('update', {
+              key,
+              value: opt.multiple ? e.target.files : e.target.files?.[0]
+            })
+        "
+      />
+
       <span class="text-xs opacity-60 italic">{{ opt.info }}</span>
     </div>
   </div>

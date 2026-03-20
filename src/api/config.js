@@ -1,13 +1,16 @@
-const DEFAULT_THEME = "caramellatte";
+// Default Theme
+const DEFAULT_THEME = "catppuccino";
 
-export const VERSION = "0.0.9";
+// KittyChef Version
+export const VERSION = "0.1.0";
 
+// Get theme from localStorage or Default Theme
 export function getTheme() {
   return localStorage.getItem("theme") || DEFAULT_THEME;
 }
 
-// Apply theme to #main
+// Apply theme to #main element
 export const applyTheme = theme => {
   localStorage.setItem("theme", theme);
-  document.getElementById("main")?.setAttribute("data-theme", theme);
+  document.getElementById("kittychef-main")?.setAttribute("data-theme", theme);
 };

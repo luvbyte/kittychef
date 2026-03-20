@@ -2,7 +2,7 @@
   import { ref, onMounted, onBeforeUnmount } from "vue";
 
   const idleFrames = ["😺", "😼", "😸", "😺"];
-  const loveBurstFrames = ["😻", "😽", "😻"];
+  const loveBurstFrames = ["😻", "😽", "😻", "😸"];
 
   const emoticon = ref(idleFrames[0]);
 
@@ -29,7 +29,7 @@
 
   function onHover() {
     isHovering = true;
-    emoticon.value = "😼";
+    emoticon.value = "😻";
   }
 
   function onLeave() {
@@ -59,11 +59,19 @@
 
 <template>
   <div
-    class="w-full h-full flex items-center justify-center cursor-pointer select-none text-xl"
+    class="fscreen flex items-center justify-center cursor-pointer select-none text-xl"
     @mouseenter="onHover"
     @mouseleave="onLeave"
     @click="onClick"
   >
-    {{ emoticon }}
+    <div class="emoji">
+      {{ emoticon }}
+    </div>
   </div>
 </template>
+
+<style scoped>
+  .emoji {
+    filter: drop-shadow(0 0 2px black);
+  }
+</style>

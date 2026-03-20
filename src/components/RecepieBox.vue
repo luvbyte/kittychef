@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { ref, computed } from "vue";
 
-  const props = defineProps(["grouped"]);
+  const props = defineProps(["grouped", "lastModuleOptions"]);
   const emit = defineEmits(["select", "close"]);
 
   const search = ref("");
@@ -36,6 +36,20 @@
     }
     return result;
   });
+
+  const totalModules = computed(() =>
+    Object.values(filteredGroups.value).reduce(
+      (total, mods) => total + mods.length,
+      0
+    )
+  );
+
+  const isDisabled = m => {
+    const outputType = props.lastModuleOptions?.outputType;
+    if (!outputType) return false;
+
+    return m.strictType && m.inputType !== outputType;
+  };
 
   // UI Accordian
   const openCategory = ref<string | null>(null);
@@ -135,9 +149,24 @@
       </button>
     </div>
 
+    <!-- Last module info -->
+    <div class="flex items-center justify-between text-xs gap-1">
+      <div>
+        Recepies
+        <strong>
+          {{ totalModules }}
+        </strong>
+      </div>
+      <div class="flex items-center gap-1">
+        DataType
+        <strong>
+          {{ lastModuleOptions ? lastModuleOptions.outputType : "byteArray" }}
+        </strong>
+      </div>
+    </div>
+    <!-- Modules List -->
     <div class="flex-1 overflow-y-auto">
-      <!-- Modules List -->
-      <div class="w-full mt-2 rounded bg-base-300/60">
+      <div class="w-full rounded bg-base-300/60">
         <div v-for="(mods, category, index) in filteredGroups" :key="category">
           <!-- Category Header -->
           <button
@@ -178,12 +207,32 @@
               <div
                 v-for="m in mods"
                 :key="m.id"
-                class="relative text-left text-xs p-2 rounded-md bg-primary text-primary-content glass font-semibold cursor-pointer"
-                @click="onModuleTap(m)"
+                class="relative text-left text-xs p-2 rounded-md font-semibold"
+                :class="[
+                  isDisabled(m)
+                    ? 'bg-base-300 text-base-content/40 cursor-not-allowed opacity-60'
+                    : 'bg-primary text-primary-content glass cursor-pointer'
+                ]"
+                @click="!isDisabled(m) && onModuleTap(m)"
               >
                 <h1>
                   {{ m.name }}
                 </h1>
+
+                <!-- Disabled message -->
+                <div
+                  class="absolute top-1 right-1 text-[10px] px-1 rounded"
+                  :class="
+                    isDisabled(m)
+                      ? 'bg-error text-error-content'
+                      : 'bg-base-100 text-base-content opacity-80'
+                  "
+                >
+                  <div class="flex items-center gap-0.5">
+                    <strong>{{ m.inputType }}</strong> ->
+                    <strong>{{ m.outputType }}</strong>
+                  </div>
+                </div>
 
                 <transition name="slide-down" mode="out-in">
                   <div
