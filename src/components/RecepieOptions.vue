@@ -80,6 +80,37 @@
         "
       />
 
+      <div v-if="opt.type === 'range'" class="w-full">
+        <div class="flex items-center gap-1">
+          <input
+            type="range"
+            :min="opt.min || 0"
+            :max="opt.max || 100"
+            :step="opt.step || 1"
+            :value="opt.value"
+            class="w-full min-h-2 bg-base-200 rounded-lg appearance-none cursor-pointer"
+            @input="
+              e =>
+                emit('update', {
+                  key,
+                  value: Number(e.target.value)
+                })
+            "
+          />
+
+          <!-- Value display -->
+          <span class="text-sm font-medium opacity-60 min-w-[6%] text-right">
+            {{ opt.value }}
+          </span>
+        </div>
+
+        <!-- Optional min/max labels -->
+        <div class="flex justify-between text-xs opacity-60">
+          <span>{{ opt.min || 0 }}</span>
+          <span>{{ opt.max || 100 }}</span>
+        </div>
+      </div>
+
       <span class="text-xs opacity-60 italic">{{ opt.info }}</span>
     </div>
   </div>

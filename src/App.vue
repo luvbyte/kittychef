@@ -1,7 +1,6 @@
 <script setup>
-  import { ref, computed, watch, nextTick } from "vue";
+  import { ref, computed, watch, nextTick, onMounted } from "vue";
   import {
-    toggleFullScreen,
     copyText,
     debounce,
     toBytes,
@@ -19,6 +18,7 @@
   import RecepiePipelineTree from "@/components/RecepiePipelineTree.vue";
   import SaveFile from "@/components/SaveFile.vue";
   import ModuleOptionsPopup from "@/components/ModuleOptionsPopup.vue";
+  import IntroPanel from "@/components/IntroPanel.vue";
 
   import { Data } from "@/core";
   import modules from "@/core/modules";
@@ -74,6 +74,7 @@
 
   // Save Data Panel
   const saveFileData = ref(null);
+  const showIntro = ref(false);
 
   /* ---------------- PIPELINE ---------------- */
 
@@ -334,6 +335,12 @@
   function onSaveFileClose() {
     saveFileData.value = null;
   }
+
+  onMounted(() => {
+    setTimeout(() => {
+      showIntro.value = localStorage.getItem("no-intro") !== "true";
+    }, 300);
+  });
 </script>
 <template>
   <!-- Main / Root Element -->
@@ -376,20 +383,6 @@
       </button>
 
       <div class="flex gap-1 items-center">
-        <!-- Browser Fullscreen -->
-        <button @click="toggleFullScreen" class="flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M21 3v6h-2V6.41l-3.29 3.3l-1.42-1.42L17.59 5H15V3zM3 3v6h2V6.41l3.29 3.3l1.42-1.42L6.41 5H9V3zm18 18v-6h-2v2.59l-3.29-3.29l-1.41 1.41L17.59 19H15v2zM9 21v-2H6.41l3.29-3.29l-1.41-1.42L5 17.59V15H3v6z"
-            />
-          </svg>
-        </button>
         <!-- Theme Button -->
         <button
           class="flex items-center gap-1 hover:cursor-pointer"
@@ -956,6 +949,10 @@
       />
     </Transition>
 
+    <Transition name="fade-scale">
+      <IntroPanel v-if="showIntro" @close="showIntro = false" />
+    </Transition>
+
     <!-- Sidebar -->
     <div
       class="fixed inset-0 z-20 full overflow-hidden"
@@ -965,7 +962,14 @@
       <!-- SIDEBAR -->
       <Transition name="slide-right">
         <div v-show="showSideBar" class="relative h-full w-3/4 sm:w-1/2 glass">
-          <Sidebar />
+          <Sidebar
+            @intro="
+              () => {
+                showSideBar = false;
+                showIntro = true;
+              }
+            "
+          />
         </div>
       </Transition>
     </div>

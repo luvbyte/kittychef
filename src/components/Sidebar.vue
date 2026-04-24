@@ -5,6 +5,8 @@
   import { usePWAInstall } from "@/composables/usePWAInstall";
   const { installPWA, isInstallable } = usePWAInstall();
 
+  import { useFullscreen } from "@/composables/useFullscreen";
+
   import Select from "@/components/ui/Select.vue";
 
   const languages = [
@@ -59,6 +61,10 @@
 
   const currentTheme = ref(getTheme());
 
+  const emit = defineEmits(["intro"]);
+
+  const { isFullscreen, toggle } = useFullscreen();
+
   function setTheme(name) {
     applyTheme(name);
     currentTheme.value = name;
@@ -71,7 +77,65 @@
 
 <template>
   <div class="h-full w-full flex flex-col p-3">
-    <div class="flex-1 flex flex-col gap-2">
+    <div class="relative flex-1 flex flex-col gap-2">
+      <!-- Top Buttons -->
+      <div class="absolute w-full flex justify-between items-center">
+        <!-- Info -->
+        <button
+          @click="emit('intro')"
+          class="flex items-center active:scale-110"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M12 4c-4.41 0-8 3.59-8 8s3.59 8 8 8s8-3.59 8-8s-3.59-8-8-8m1 13h-2v-6h2zm0-8h-2V7h2z"
+              opacity="0.3"
+            />
+            <path
+              fill="currentColor"
+              d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8"
+            />
+          </svg>
+        </button>
+        <!-- Fullscreen -->
+        <button @click="toggle" class="flex items-center active:scale-110">
+          <!-- maximize -->
+          <svg
+            v-if="!isFullscreen"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M21 3v6h-2V6.41l-3.29 3.3l-1.42-1.42L17.59 5H15V3zM3 3v6h2V6.41l3.29 3.3l1.42-1.42L6.41 5H9V3zm18 18v-6h-2v2.59l-3.29-3.29l-1.41 1.41L17.59 19H15v2zM9 21v-2H6.41l3.29-3.29l-1.41-1.42L5 17.59V15H3v6z"
+            />
+          </svg>
+          <!-- minimize -->
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 9h4m0 0V5m0 4L4 4m15 5h-4m0 0V5m0 4l5-5M5 15h4m0 0v4m0-4l-5 5m15-5h-4m0 0v4m0-4l5 5"
+            />
+          </svg>
+        </button>
+      </div>
       <!-- Top -->
       <div class="w-full flex flex-col justify-center items-center">
         <div>
@@ -297,7 +361,9 @@
  （„• ֊ •„)♡
 ┏ • UU • - • - • - • - • - • - • ღ❦ღ┓</pre
     >
-    <div class="divider m-0 text-sm flex items-center gap-1 justify-center my-4">
+    <div
+      class="divider m-0 text-sm flex items-center gap-1 justify-center my-4"
+    >
       <span class="badge badge-sm badge-primary font-semibold font-heading"
         >KittyChef</span
       >
@@ -338,7 +404,7 @@
         </svg>
       </a>
       <!-- Github -->
-      <a href="https://github.com/luvbyte" target="_blank">
+      <a href="https://github.com/luvbyte/kittychef" target="_blank">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="28"

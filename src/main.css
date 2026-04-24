@@ -54,6 +54,10 @@ select, input {
   @apply border;
 }
 
+.textarea {
+  @apply border
+}
+
 @theme {
   --font-heading: "Jost", sans-serif;
   --font-body: "Cause", auto;
