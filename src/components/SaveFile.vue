@@ -49,74 +49,63 @@
   </div>
 </template>
 
-<script setup lang="ts">
-  import { ref, computed } from "vue";
+<script setup>
+import { ref, computed } from "vue";
 
-  // Supported MIME Types
-  type SupportedType =
-    | "text/plain"
-    | "application/json"
-    | "application/pdf"
-    | "application/octet-stream";
+// Props
+const props = defineProps({
+  file: {
+    type: Object,
+    required: true,
+  },
+});
 
-  interface SaveFilePayload {
-    data: Uint8Array;
-    dataType: SupportedType | null;
-    name: string | null;
+// Emits
+const emit = defineEmits(["close"]);
+
+const filename = ref(props.file.name || "output");
+
+// Used only if parent did NOT provide the type
+const selectedType = ref("text/plain");
+
+// Computed Active MIME Type
+const activeType = computed(() => {
+  return props.file.dataType ?? selectedType.value;
+});
+
+// Extension Resolver
+const extension = computed(() => {
+  switch (activeType.value) {
+    case "text/plain":
+      return "txt";
+    case "application/json":
+      return "json";
+    case "application/pdf":
+      return "pdf";
+    default:
+      return "bin";
   }
+});
 
-  const props = defineProps<{
-    file: SaveFilePayload;
-  }>();
+const downloadFile = () => {
+  if (!props.file?.data || !filename.value.trim()) return;
 
-  const emit = defineEmits<{
-    (e: "close"): void;
-  }>();
-
-  const filename = ref(props.file.name || "output");
-
-  // Used only if parent did NOT fix the type
-  // const selectedType = ref<SupportedType>("application/octet-stream");
-  const selectedType = ref<SupportedType>("text/plain");
-
-  // Computed Active MIME Type
-  const activeType = computed<SupportedType>(() => {
-    return props.file.dataType ?? selectedType.value;
+  const blob = new Blob([props.file.data], {
+    type: activeType.value,
   });
 
-  // Extension Resolver
-  const extension = computed(() => {
-    switch (activeType.value) {
-      case "text/plain":
-        return "txt";
-      case "application/json":
-        return "json";
-      case "application/pdf":
-        return "pdf";
-      default:
-        return "bin";
-    }
-  });
+  const url = URL.createObjectURL(blob);
 
-  const downloadFile = () => {
-    if (!props.file?.data || !filename.value.trim()) return;
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${filename.value.trim()}.${extension.value}`;
 
-    const blob = new Blob([props.file.data], {
-      type: activeType.value
-    });
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
-    const url = URL.createObjectURL(blob);
+  URL.revokeObjectURL(url);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${filename.value.trim()}.${extension.value}`;
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-
-    emit("close");
-  };
+  emit("close");
+};
 </script>

@@ -1,7 +1,10 @@
-<script setup lang="ts">
-  const props = defineProps<{
-    module: any;
-  }>();
+<script setup>
+  const props = defineProps({
+    module: {
+      type: Object,
+      required: true
+    }
+  });
 
   const emit = defineEmits(["update"]);
 </script>

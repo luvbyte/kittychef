@@ -1,18 +1,15 @@
-<script setup lang="ts">
+<script setup>
   import { computed } from "vue";
   import { copyText, pasteText } from "@/utils";
 
-  /* ================= PROPS / EMITS ================= */
+  const props = defineProps({
+    data: {
+      type: Uint8Array,
+      required: true
+    }
+  });
 
-  const props = defineProps<{
-    data: Uint8Array; //
-  }>();
-
-  const emit = defineEmits<{
-    (e: "update:data", val: Uint8Array): void;
-  }>();
-
-  /* ================= TEXT <-> BINARY ================= */
+  const emit = defineEmits(["update:data"]);
 
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
@@ -23,29 +20,28 @@
   });
 
   /* Emit string as Uint8Array */
-  function updateText(val: string) {
+  function updateText(val) {
     emit("update:data", encoder.encode(val));
   }
 
-  /* ================= IMPORT FILE ================= */
-
   function importFile() {
     const input = document.createElement("input");
+
     input.type = "file";
     input.accept = ".txt,.json,.md,.csv,.log,.html,.xml,*/*";
 
     input.onchange = async e => {
-      const file = (e.target as HTMLInputElement).files?.[0];
+      const file = e.target.files?.[0];
+
       if (!file) return;
 
       const arrayBuffer = await file.arrayBuffer();
+
       emit("update:data", new Uint8Array(arrayBuffer));
     };
 
     input.click();
   }
-
-  /* ================= CLIPBOARD ================= */
 
   function copy() {
     copyText(text.value);
@@ -56,18 +52,14 @@
     updateText(text.value + pasted);
   }
 
-  /* ================= BASIC ACTIONS ================= */
-
   function clearText() {
     updateText("");
   }
 
   function selectAll() {
-    const el = document.getElementById("input-box-ref") as HTMLTextAreaElement;
+    const el = document.getElementById("input-box-ref");
     el?.select();
   }
-
-  /* ================= TRANSFORMS ================= */
 
   function toUppercase() {
     updateText(text.value.toUpperCase());

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed fscreen inset-0 z-[999] flex flex-col items-center gap-4 pt-16 bg-base-100/60"
+    class="fixed fscreen inset-0 z-[999] flex flex-col items-center gap-4 pt-16 bg-black/60"
   >
     <div
       class="w-[90%] max-h-[80%] md:w-[60%] bg-base-100 shadow-2xl rounded-2xl overflow-hidden flex flex-col border border-base-content/10"
@@ -73,7 +73,7 @@
 
         <!-- Coming Soon Badge -->
         <div class="text-xs text-center opacity-60 pt-2">
-          ❤ Created by @luvbyte
+          ᥫ᭡ Created by @luvbyte
         </div>
       </div>
 
@@ -91,8 +91,8 @@
     <!-- Action Buttons -->
     <!-- checkbox -->
     <label class="flex flex gap-1 items-center justify-center">
-      <input type="checkbox" class="checkbox" v-model="noIntroFlag" />
-      <h1>Don’t show at startup</h1>
+      <input type="checkbox" class="checkbox bg-white" v-model="noIntroFlag" />
+      <h1 class="text-white">Don’t show at startup</h1>
     </label>
   </div>
 </template>

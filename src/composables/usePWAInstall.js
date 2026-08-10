@@ -1,9 +1,9 @@
 import { ref } from "vue";
 
-const deferredPrompt = ref<any>(null);
+const deferredPrompt = ref(null);
 const isInstallable = ref(false);
 
-// listen event only once
+// Listen for the event only once
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredPrompt.value = e;
@@ -24,11 +24,9 @@ export function usePWAInstall() {
     const choice = await deferredPrompt.value.userChoice;
 
     if (choice.outcome === "accepted") {
-      if ("toast" in window) {
-        new Toast("Installed Succesfully").show();
+      if ("Toast" in window) {
+        new Toast("Installed Successfully").show();
       }
-    } else {
-      // console.log("PWA dismissed.");
     }
 
     // Reset so it doesn't show twice

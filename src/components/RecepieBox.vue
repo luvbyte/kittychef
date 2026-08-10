@@ -1,75 +1,85 @@
-<script setup lang="ts">
-  import { ref, computed } from "vue";
+<script setup>
+import { ref, computed } from "vue";
 
-  const props = defineProps(["grouped", "lastModuleOptions"]);
-  const emit = defineEmits(["select", "close"]);
+const props = defineProps(["grouped", "lastModuleOptions"]);
+const emit = defineEmits(["select", "close"]);
 
-  const search = ref("");
+const search = ref("");
 
-  const activeModuleId = ref(null);
+const activeModuleId = ref(null);
 
-  function close() {
-    emit("close");
+function close() {
+  emit("close");
+}
+
+function onModuleTap(m) {
+  if (activeModuleId.value === m.id) {
+    // Second tap → select module
+    selectModule(m);
+    activeModuleId.value = null;
+  } else {
+    // First tap → show description
+    activeModuleId.value = m.id;
   }
+}
 
-  function onModuleTap(m) {
-    if (activeModuleId.value === m.id) {
-      // Second tap → select module
-      selectModule(m);
-      activeModuleId.value = null;
-    } else {
-      // First tap → show description
-      activeModuleId.value = m.id;
+const filteredGroups = computed(() => {
+  const term = search.value.trim().toLowerCase();
+
+  if (!term) return props.grouped;
+
+  const result = {};
+
+  for (const [category, mods] of Object.entries(props.grouped)) {
+    const filtered = mods.filter((m) =>
+      m.name.toLowerCase().includes(term)
+    );
+
+    if (filtered.length > 0) {
+      result[category] = filtered;
     }
   }
 
-  const filteredGroups = computed(() => {
-    const term = search.value.trim().toLowerCase();
-    if (!term) return props.grouped;
+  return result;
+});
 
-    const result = {};
-    for (const [category, mods] of Object.entries(props.grouped)) {
-      const filtered = mods.filter(m => m.name.toLowerCase().includes(term));
-      if (filtered.length > 0) {
-        result[category] = filtered;
-      }
-    }
-    return result;
-  });
+const totalModules = computed(() =>
+  Object.values(filteredGroups.value).reduce(
+    (total, mods) => total + mods.length,
+    0
+  )
+);
 
-  const totalModules = computed(() =>
-    Object.values(filteredGroups.value).reduce(
-      (total, mods) => total + mods.length,
-      0
-    )
-  );
+const isDisabled = (m) => {
+  const outputType = props.lastModuleOptions?.outputType;
 
-  const isDisabled = m => {
-    const outputType = props.lastModuleOptions?.outputType;
-    if (!outputType) return false;
+  if (!outputType) return false;
 
-    return m.strictType && m.inputType !== outputType;
-  };
+  return m.strictType && m.inputType !== outputType;
+};
 
-  // UI Accordian
-  const openCategory = ref<string | null>(null);
+// UI Accordion
+const openCategory = ref(null);
 
-  function toggle(category: string) {
-    // When searching, ignore manual toggling
-    if (search.value.trim()) return;
-    openCategory.value = openCategory.value === category ? null : category;
-  }
+function toggle(category) {
+  // When searching, ignore manual toggling
+  if (search.value.trim()) return;
 
-  // Expansion
-  const isOpen = (category: string) => {
-    if (search.value.trim()) return true; // Auto-expand all during search
-    return openCategory.value === category;
-  };
+  openCategory.value =
+    openCategory.value === category ? null : category;
+}
 
-  function selectModule(m) {
-    emit("select", m);
-    close();
-  }
+// Expansion
+const isOpen = (category) => {
+  if (search.value.trim()) return true; // Auto-expand all during search
+
+  return openCategory.value === category;
+};
+
+function selectModule(m) {
+  emit("select", m);
+  close();
+}
 </script>
 
 <template>

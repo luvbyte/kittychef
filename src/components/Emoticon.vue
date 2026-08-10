@@ -1,13 +1,13 @@
-<script setup lang="ts">
+<script setup>
   import { ref, onMounted, onBeforeUnmount } from "vue";
 
-  const idleFrames = ["😺", "😼", "😸", "😺"];
+  const idleFrames = ["😺", "😸", "😺"];
   const loveBurstFrames = ["😻", "😽", "😻", "😸"];
 
   const emoticon = ref(idleFrames[0]);
 
   let frameIndex = 0;
-  let intervalId: number | undefined;
+  let intervalId;
   let isHovering = false;
   let isBursting = false;
 

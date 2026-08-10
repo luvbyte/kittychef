@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
   import { ref, onMounted, onBeforeMount } from "vue";
   import { getTheme, applyTheme, VERSION } from "@/api/config";
 
@@ -6,6 +6,8 @@
   const { installPWA, isInstallable } = usePWAInstall();
 
   import { useFullscreen } from "@/composables/useFullscreen";
+
+  import themes from "@/api/themes";
 
   import Select from "@/components/ui/Select.vue";
 
@@ -21,44 +23,6 @@
     { label: "🇨🇳 中文", value: "zh" }
   ];
 
-  // Daisyui themes
-  const themes = [
-    "catppuccino",
-    "coffee",
-    "caramellatte",
-    "dim",
-    "valentine",
-    "dracula",
-    "light",
-    "dark",
-    "cupcake",
-    "black",
-    "retro",
-    "halloween",
-    "bumblebee",
-    "synthwave",
-    "emerald",
-    "forest",
-    "corporate",
-    "luxury",
-    "garden",
-    "sunset",
-    "lofi",
-    "business",
-    "pastel",
-    "night",
-    "fantasy",
-    "abyss",
-    "wireframe",
-    "cmyk",
-    "autumn",
-    "acid",
-    "lemonade",
-    "winter",
-    "nord",
-    "silk"
-  ];
-
   const currentTheme = ref(getTheme());
 
   const emit = defineEmits(["intro"]);
@@ -66,11 +30,10 @@
   const { isFullscreen, toggle } = useFullscreen();
 
   function setTheme(name) {
-    applyTheme(name);
-    currentTheme.value = name;
+    currentTheme.value = applyTheme(name);
   }
 
-  onMounted(async () => {
+  onMounted(() => {
     applyTheme(currentTheme.value);
   });
 </script>

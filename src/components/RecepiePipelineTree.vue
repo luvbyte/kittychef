@@ -1,172 +1,212 @@
-<script setup lang="ts">
-  import { ref, computed } from "vue";
-  import modules from "@/core/modules";
+<script setup>
+import { ref, computed } from "vue";
+import modules from "@/core/modules";
 
-  import RecepieOptions from "@/components/RecepieOptions.vue";
+import RecepieOptions from "@/components/RecepieOptions.vue";
 
-  import { VERSION } from "@/api/config";
+import { VERSION } from "@/api/config";
 
-  const props = defineProps<{
-    recepiePipeline: any[];
-    errorIndex: any;
-    errorMessage: any;
-    clearPipeline: () => void;
-    addRecepie: () => void;
-  }>();
+const props = defineProps({
+  recepiePipeline: {
+    type: Array,
+    required: true,
+  },
+  errorIndex: {
+    type: [Number, null],
+    default: null,
+  },
+  errorMessage: {
+    type: [String, null],
+    default: null,
+  },
+  clearPipeline: {
+    type: Function,
+    required: true,
+  },
+  addRecepie: {
+    type: Function,
+    required: true,
+  },
+});
 
-  const emit = defineEmits(["close", "saveFile"]);
+const emit = defineEmits(["close", "saveFile"]);
 
-  function close() {
-    emit("close");
+function close() {
+  emit("close");
+}
+
+const collapsedPipelines = ref([]);
+
+function getKey(mod, i) {
+  return `${mod.id}-${i}`;
+}
+
+function toggleOptions(mod, i) {
+  if (Object.keys(mod.options).length === 0 && !mod.description) return;
+
+  const key = getKey(mod, i);
+
+  const index = collapsedPipelines.value.indexOf(key);
+
+  if (index === -1) {
+    collapsedPipelines.value.push(key);
+  } else {
+    collapsedPipelines.value.splice(index, 1);
   }
+}
 
-  const collapsedPipelines = ref([]);
+function toggleCollapse() {
+  const allKeys = props.recepiePipeline.map((mod, i) =>
+    getKey(mod, i)
+  );
 
-  function getKey(mod: any, i: number) {
-    return `${mod.id}-${i}`;
+  collapsedPipelines.value =
+    collapsedPipelines.value.length === allKeys.length
+      ? []
+      : allKeys;
+}
+
+// Clear
+function clear() {
+  props.clearPipeline();
+  collapsedPipelines.value = [];
+}
+
+function moveUp(i) {
+  if (i === 0) return;
+
+  const arr = props.recepiePipeline;
+  [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
+}
+
+function moveDown(i) {
+  const arr = props.recepiePipeline;
+
+  if (i >= arr.length - 1) return;
+
+  [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+}
+
+function removeItem(i, mod) {
+  const key = getKey(mod, i);
+
+  props.recepiePipeline.splice(i, 1);
+
+  const index = collapsedPipelines.value.indexOf(key);
+
+  if (index !== -1) {
+    collapsedPipelines.value.splice(index, 1);
   }
+}
 
-  function toggleOptions(mod: any, i: number) {
-    if (Object.keys(mod.options).length === 0 && !mod.description) return;
+const hasRecepies = computed(() => props.recepiePipeline.length > 0);
 
-    const key = getKey(mod, i);
+function exportPipeline() {
+  if (!hasRecepies.value) return;
 
-    const index = collapsedPipelines.value.indexOf(key);
+  const clean = props.recepiePipeline.map((mod) => {
+    const opts = {};
 
-    if (index === -1) {
-      collapsedPipelines.value.push(key);
-    } else {
-      collapsedPipelines.value.splice(index, 1);
+    for (const key in mod.options) {
+      opts[key] = mod.options[key].value;
     }
-  }
 
-  function toggleCollapse() {
-    const allKeys = props.recepiePipeline.map((mod, i) => getKey(mod, i));
-
-    collapsedPipelines.value =
-      collapsedPipelines.value.length === allKeys.length ? [] : allKeys;
-  }
-
-  // Clear
-  function clear() {
-    props.clearPipeline();
-    collapsedPipelines.value = [];
-  }
-
-  function moveUp(i: number) {
-    if (i === 0) return;
-    const arr = props.recepiePipeline;
-    [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
-  }
-
-  function moveDown(i: number) {
-    const arr = props.recepiePipeline;
-    if (i >= arr.length - 1) return;
-    [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
-  }
-
-  function removeItem(i: number, mod: any) {
-    const key = getKey(mod, i);
-
-    props.recepiePipeline.splice(i, 1);
-
-    const index = collapsedPipelines.value.indexOf(key);
-    if (index !== -1) {
-      collapsedPipelines.value.splice(index, 1);
-    }
-  }
-  const hasRecepies = computed(() => props.recepiePipeline.length > 0);
-
-  function exportPipeline() {
-    if (!hasRecepies.value) return;
-
-    const clean = props.recepiePipeline.map(mod => {
-      const opts = {};
-      for (const key in mod.options) {
-        opts[key] = mod.options[key].value;
-      }
-
-      return {
-        id: mod.id,
-        options: opts
-      };
-    });
-
-    const json = JSON.stringify(
-      {
-        version: VERSION,
-        pipeline: clean,
-        total: clean.length
-      },
-      null,
-      2
-    );
-
-    // Convert to Uint8Array
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(json);
-
-    emit("saveFile", bytes, "application/json", "recepies");
-  }
-
-  // IMPORT (REBUILD FROM modules OBJECT)
-  function importPipeline() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-
-    input.onchange = async e => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-
-        const pipeline = data.pipeline;
-
-        if (!Array.isArray(pipeline)) {
-          alert("Invalid pipeline file");
-          return;
-        }
-
-        const rebuilt = pipeline
-          .map(item => {
-            const base = modules[item.id]; // lookup module
-            if (!base) return null;
-
-            // shallow clone module WITHOUT destroying run() function
-            const modClone = {
-              ...base,
-              options: {}
-            };
-
-            // options
-            for (const key in base.options) {
-              modClone.options[key] = {
-                ...base.options[key],
-                value: item.options?.[key] ?? base.options[key].default ?? ""
-              };
-            }
-
-            return modClone;
-          })
-          .filter(Boolean); // remove nulls
-
-        props.recepiePipeline.splice(
-          0,
-          props.recepiePipeline.length,
-          ...rebuilt
-        );
-
-        alert("Recepie pipeline imported successfully!");
-      } catch (err) {
-        alert("Failed to import Recepie pipeline: " + err.message);
-      }
+    return {
+      id: mod.id,
+      options: opts,
     };
+  });
 
-    input.click();
-  }
+  const json = JSON.stringify(
+    {
+      version: VERSION,
+      pipeline: clean,
+      total: clean.length,
+    },
+    null,
+    2
+  );
+
+  // Convert to Uint8Array
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(json);
+
+  emit(
+    "saveFile",
+    bytes,
+    "application/json",
+    "recepies"
+  );
+}
+
+// IMPORT (REBUILD FROM modules OBJECT)
+function importPipeline() {
+  const input = document.createElement("input");
+
+  input.type = "file";
+  input.accept = "application/json";
+
+  input.onchange = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      const pipeline = data.pipeline;
+
+      if (!Array.isArray(pipeline)) {
+        alert("Invalid pipeline file");
+        return;
+      }
+
+      const rebuilt = pipeline
+        .map((item) => {
+          const base = modules[item.id];
+
+          // Module not found
+          if (!base) return null;
+
+          // Shallow clone module WITHOUT destroying run() function
+          const modClone = {
+            ...base,
+            options: {},
+          };
+
+          // Options
+          for (const key in base.options) {
+            modClone.options[key] = {
+              ...base.options[key],
+              value:
+                item.options?.[key] ??
+                base.options[key].default ??
+                "",
+            };
+          }
+
+          return modClone;
+        })
+        .filter(Boolean);
+
+      props.recepiePipeline.splice(
+        0,
+        props.recepiePipeline.length,
+        ...rebuilt
+      );
+
+      alert("Recepie pipeline imported successfully!");
+    } catch (err) {
+      alert(
+        "Failed to import Recepie pipeline: " +
+          err.message
+      );
+    }
+  };
+
+  input.click();
+}
 </script>
 
 <template>
